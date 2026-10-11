@@ -5,7 +5,7 @@ Approved roadmap: 50 engine steps plus 4 separate UBC steps. Names finalized on 
 ## Current checked state
 
 - Engine main was initialized with README commit `275f836230a34072cff88f1c2d1650faa65d75c1` so subsequent changes can use PRs.
-- E01 specification, traceability, decision register and roadmap validation are being submitted for review; not yet recorded here as merged.
+- E01 specification, traceability, decision register and roadmap validation: [PR #1](https://github.com/neophilism/Live-Debate-Engine/pull/1), in review. Merge and exact-head/main checks must be verified independently of this snapshot.
 - E02-E50: not implemented. U01-U04: not implemented; U01 waits for E47.
 - UBC Debates was inspected and is empty. No premature branded application has been created.
 - Render and Neon: supplied targets recorded, authenticated access unavailable in this session, no cloud mutations performed.

@@ -12,6 +12,8 @@ export function databaseConfig(connectionString: string, env: DatabaseEnvironmen
   if (!['postgres:', 'postgresql:'].includes(url.protocol) || !url.hostname || url.pathname === '/' || !url.pathname) {
     throw new Error('Invalid database URL');
   }
+  const keys = [...url.searchParams.keys()];
+  if (new Set(keys).size !== keys.length) throw new Error('Unsupported duplicate database URL option');
   const local = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
   const insecure = env.LDE_ALLOW_INSECURE_LOCAL_DB === '1';
   if (insecure && (!local || env.NODE_ENV === 'production')) throw new Error('Plaintext database connections are restricted to local development');
@@ -20,7 +22,7 @@ export function databaseConfig(connectionString: string, env: DatabaseEnvironmen
   // The driver can prefer channel binding, not enforce require. Do not silently downgrade.
   const binding = url.searchParams.get('channel_binding');
   if (binding && binding !== 'prefer') throw new Error('Unsupported mandatory or disabled channel-binding policy');
-  for (const key of [...url.searchParams.keys()]) {
+  for (const key of keys) {
     if (!['sslmode', 'channel_binding'].includes(key)) throw new Error('Unsupported database URL option');
     url.searchParams.delete(key);
   }

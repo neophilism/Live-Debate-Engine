@@ -15,6 +15,11 @@ for (const input of ['not a url', 'https://example.invalid/db', 'postgresql://lo
 for (const option of ['sslmode=disable', 'sslmode=no-verify', 'sslcert=secret.pem', 'host=evil.invalid', 'options=bad', 'channel_binding=require', 'channel_binding=disable']) {
   test(`unapproved connection option rejected: ${option}`, () => assert.throws(() => databaseConfig(`${remote}?${option}`), /Unsupported/));
 }
+test('ambiguous duplicate options are rejected before normalization', () => {
+  for (const option of ['channel_binding=prefer&channel_binding=require', 'sslmode=require&sslmode=disable']) {
+    assert.throws(() => databaseConfig(`${remote}?${option}`), /duplicate/);
+  }
+});
 test('plaintext is opt-in and restricted to local non-production', () => {
   const local = 'postgresql://test_user:test_only@127.0.0.1/lde_dev?sslmode=disable';
   assert.equal(databaseConfig(local, { NODE_ENV: 'development', LDE_ALLOW_INSECURE_LOCAL_DB: '1' }).ssl, false);

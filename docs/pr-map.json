@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "repository": "neophilism/Live-Debate-Engine",
+  "mappings": [
+    { "step": "E01", "pr": 1 }
+  ]
+}

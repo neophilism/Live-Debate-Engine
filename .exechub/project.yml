@@ -1,0 +1,30 @@
+project:
+  name: Live-Debate-Engine
+  display_name: Live Debate Engine
+  repository: neophilism/Live-Debate-Engine
+  status: active-development
+
+roadmap:
+  version: 1
+  planned_prs: 50
+  approved: true
+
+milestones:
+  - name: Foundations and reusable application
+    prs: 6
+  - name: Rules participants and preparation
+    prs: 6
+  - name: Conducting the debate
+    prs: 7
+  - name: Voting judging and results
+    prs: 7
+  - name: Prizes tournaments disputes and settlement
+    prs: 6
+  - name: Publishing white labeling and integrations
+    prs: 5
+  - name: AI capability and qualification infrastructure
+    prs: 6
+  - name: Production hardening and engine release
+    prs: 4
+  - name: Evidence-based AI promotion after UBC pilot
+    prs: 3

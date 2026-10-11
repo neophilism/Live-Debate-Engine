@@ -126,7 +126,12 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run build
       - run: node node_modules/playwright/cli.js install --with-deps chromium
-      - run: npm run test:browser
+      - name: Run real-browser acceptance with retained diagnostics
+        shell: bash
+        run: |
+          mkdir -p artifacts/ui
+          set -o pipefail
+          npm run test:browser 2>&1 | tee artifacts/ui/browser-test.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

@@ -11,3 +11,5 @@ artifacts/
 .DS_Store
 
 .lde-mail/
+
+.lde-keys/

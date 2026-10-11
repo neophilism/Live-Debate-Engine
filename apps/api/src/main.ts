@@ -1,3 +1,6 @@
+import { FileKeyProvider } from '../../../packages/security/src/keys.js';
+import { ProtectedObjectStore } from '../../../packages/security/src/store.js';
+import { createObjectHttp } from '../../../packages/security/src/http.js';
 import pg from 'pg';
 import { databaseConfig } from '../../../packages/database/src/config.js';
 import { loadMigrations, schemaCompatible } from '../../../packages/database/src/migrations.js';
@@ -28,7 +31,12 @@ try {
     providerPool.on('error', () => console.error(JSON.stringify({ event: 'identity_pool_error' })));
     identity = await createIdentityRuntime({ pool: providerPool, runtimePool: pool, config, sendMail: identityMailer(config, env) });
   }
+  if (env.LDE_STORAGE_KEY_FILE && (!identity || !pool)) throw new Error('Identity required for protected storage');
+  const keys = env.LDE_STORAGE_KEY_FILE ? new FileKeyProvider(env.LDE_STORAGE_KEY_FILE) : null;
+  if (keys) await keys.active('asset-ticket');
+  const objects = keys && pool && identity ? createObjectHttp(new ProtectedObjectStore(pool, keys), identity, env.LDE_IDENTITY_ORIGIN ?? '') : null;
   const api = createApi({
+    ...(objects ? { objects } : {}),
     ...(identity ? { identity } : {}),
     ...(env.RENDER_GIT_COMMIT ? { release: env.RENDER_GIT_COMMIT } : {}),
     readiness: async () => {

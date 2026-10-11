@@ -5,7 +5,7 @@ Approved: 50 engine steps, 4 separate UBC steps. Counts are not effort or produc
 | Step | Actual PR | Verified state |
 |---|---|---|
 | E01 | #1 | Merged ddff3302b5ee3de0057fab1c459c4df7f607c923; exact-head run 38125095302 and main run 38125139802 passed; separate self-review recorded |
-| E02 | Not yet mapped | Foundation implementation being submitted; CI and review pending |
+| E02 | #2 | Foundation implemented on PR branch; lockfile bootstrap, final CI and security review pending |
 | E03-E50 | None | Not implemented |
 | U01-U04 | None | Not implemented; UBC remains empty; U01 waits for E47 |
 

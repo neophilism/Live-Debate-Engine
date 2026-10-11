@@ -1,12 +1,10 @@
 import type { PoolConfig } from 'pg';
 
-export type DatabaseEnvironment = Readonly<{
-  NODE_ENV?: string;
-  LDE_ALLOW_INSECURE_LOCAL_DB?: string;
-}>;
+export type DatabaseEnvironment = Readonly<Record<string, string | undefined>>;
 
 /** Never let URI sslmode options override explicit certificate verification. */
 export function databaseConfig(connectionString: string, env: DatabaseEnvironment = {}): PoolConfig {
+  if (env.NODE_ENV && !['development', 'test', 'production'].includes(env.NODE_ENV)) throw new Error('Invalid environment');
   let url: URL;
   try { url = new URL(connectionString); } catch { throw new Error('Invalid database URL'); }
   if (!['postgres:', 'postgresql:'].includes(url.protocol) || !url.hostname || url.pathname === '/' || !url.pathname) {

@@ -2,13 +2,14 @@ import { createHash } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Pool, PoolClient } from 'pg';
+import { validateMigrationSql } from './sql-guard.js';
 
 export type Migration = Readonly<{ name: string; sql: string; checksum: string }>;
 export type MigrationRow = { name: string; checksum: string };
 
 export function migration(name: string, sql: string): Migration {
   if (!/^\d{4}_[a-z0-9_]+\.sql$/.test(name) || !sql.trim()) throw new Error('Invalid migration file');
-  if (/^\s*(BEGIN|COMMIT|ROLLBACK)\s*;/im.test(sql)) throw new Error('Migrations cannot control their transaction');
+  validateMigrationSql(sql);
   return Object.freeze({ name, sql, checksum: createHash('sha256').update(sql, 'utf8').digest('hex') });
 }
 
@@ -40,6 +41,7 @@ export function verifyApplied(entries: readonly Migration[], applied: readonly M
 export async function applyMigrations(pool: Pool, entries: readonly Migration[]): Promise<number> {
   validateMigrationOrder(entries);
   const client: PoolClient = await pool.connect();
+  let discardConnection = false;
   try {
     await client.query('BEGIN');
     await client.query("SET LOCAL lock_timeout = '5s'");
@@ -58,9 +60,9 @@ export async function applyMigrations(pool: Pool, entries: readonly Migration[])
     await client.query('COMMIT');
     return entries.length - applied.rows.length;
   } catch (error) {
-    await client.query('ROLLBACK').catch(() => undefined);
+    try { await client.query('ROLLBACK'); } catch { discardConnection = true; }
     throw error;
-  } finally { client.release(); }
+  } finally { client.release(discardConnection); }
 }
 
 export async function schemaCompatible(pool: Pool, entries: readonly Migration[]): Promise<boolean> {

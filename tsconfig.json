@@ -19,13 +19,15 @@
     "skipLibCheck": false,
     "types": [
       "node"
-    ]
+    ],
+    "jsx": "react-jsx"
   },
   "include": [
     "apps/**/*.ts",
     "packages/**/*.ts",
     "scripts/**/*.ts",
-    "tests/typecheck/**/*.ts"
+    "tests/typecheck/**/*.ts",
+    "packages/**/*.tsx"
   ],
   "exclude": [
     "node_modules",

@@ -84,7 +84,7 @@ export async function createIdentityRuntime(options: IdentityOptions & Readonly<
     const authPath = url.pathname.startsWith('/api/auth/') ? url.pathname.slice('/api/auth'.length) : null;
     const tenantAccess = /^\/api\/tenants\/([^/]+)\/events\/([^/]+)\/access$/.exec(url.pathname);
     const revoke = /^\/api\/sessions\/([^/]+)\/revoke$/.exec(url.pathname);
-    if (authPath === null && !tenantAccess && !revoke && !['/api/session', '/api/sessions'].includes(url.pathname)) return false;
+    if (authPath === null && !tenantAccess && !revoke && !['/api/session', '/api/sessions', '/api/workspaces'].includes(url.pathname)) return false;
     try {
       const method = request.method ?? '';
       if (method !== 'GET') {
@@ -114,7 +114,14 @@ export async function createIdentityRuntime(options: IdentityOptions & Readonly<
         if (bytes.length > 0 && bytes.toString('utf8').trim() !== '{}') throw new HttpError(400, 'invalid_request');
       }
       const signedIn = await current(request);
-      if (url.pathname === '/api/session') {
+      if (url.pathname === '/api/workspaces') {
+        if (method !== 'GET') throw new HttpError(405, 'method_not_allowed');
+        const workspaces = await withCredential(options.runtimePool, signedIn.token, async (client) => {
+          const result = await client.query<{ tenant_id: string; event_id: string | null; roles: string[]; capabilities: string[] }>('SELECT * FROM lde_security.my_workspaces()');
+          return result.rows.map((row) => ({ tenantId: row.tenant_id, eventId: row.event_id, roles: row.roles, capabilities: row.capabilities }));
+        });
+        send(response, 200, { workspaces });
+      } else if (url.pathname === '/api/session') {
         if (method !== 'GET') throw new HttpError(405, 'method_not_allowed');
         send(response, 200, { principalId: signedIn.actor.principalId, sessionId: signedIn.actor.sessionId, assurance: signedIn.actor.mfaVerifiedAt ? 'mfa' : 'single-factor', mfaVerifiedAt: signedIn.actor.mfaVerifiedAt });
       } else if (url.pathname === '/api/sessions') {

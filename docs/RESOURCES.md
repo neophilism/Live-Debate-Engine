@@ -1,6 +1,6 @@
 # Project resources
 
-Supplied and approved for this project by the owner on 2026-10-11. These identifiers are resource references, not credentials or proof of current service health. GitHub repositories were read through the connected GitHub account; cloud dashboard links have not been authenticated or verified.
+Supplied by the owner on 2026-10-11. These identifiers are resource references, not credentials or proof of application readiness. Authenticated Render and Neon reads now work; see [the scoped verification record](CLOUD_ACCESS.md).
 
 | Product | GitHub | Render project | Neon project | Neon branch |
 |---|---|---|---|---|
@@ -17,12 +17,14 @@ UBC Neon: https://console.neon.tech/app/projects/hidden-tree-79062557/branches/b
 
 ## Access and operational gates
 
-Render and Neon integrations were discoverable but not connected in the working session. Do not treat the links as API credentials; do not ask for secrets to be committed or posted publicly. Verify the exact project/branch, data purpose and existing services before changes. No cloud service, migration, secret or database was modified by E01.
+Both exact Neon project/branch pairs were verified with authenticated reads; both branches are named production and use PostgreSQL 18. The engine's provider display name is Live Debate Platform; no rename was performed. Render workspace/service inventory is accessible, but the available connector cannot read project containers or verify assignment to the supplied project IDs. No listed Render service uses these new repositories. The existing Debate-Engine service is unrelated and untouched.
 
-The repositories are public. The original business plan, source DOCX files, live personal records, tax forms and credentials remain outside them. Do not introduce network-wide financial projections as engineering budgets or authorization to spend.
+No cloud schema, credentials, services or configuration were changed. Follow CLOUD_ACCESS.md before future mutations. Do not treat dashboard links as API credentials or a connection as authorization for additional costs. Keep production branches separate from development validation.
+
+The repositories are public. Private source documents, participant records, tax forms and secrets remain outside them. Network-wide financial projections are neither engineering budgets nor authorization to spend.
 
 ## Engine Room
 
-The existing `neophilism/Engine-Room` integration reads approved `.exechub/project.yml` manifests and real PR records. This engine publishes its 50-step approved count. UBC has its own four-step count; do not count U steps as engine PRs. E48 depends on U04, so engine AI-promotion completion must not be inferred from the V1 release.
+The existing `neophilism/Engine-Room` integration reads approved `.exechub/project.yml` manifests and real PR records. This engine has 50 approved steps. UBC has four separate steps; U steps must not inflate the engine count. E48 depends on U04, so V1 release is not completed AI promotion.
 
-The manifest format was checked against Engine Room's `.exechub/project.yml` and `docs/live-project-integration.md`. Actual PR-number mappings must come from GitHub and be approved/imported through the existing process. No dashboard ingestion, current health, credentialed telemetry or production registration is claimed until observed.
+Manifest format was checked against Engine Room's `.exechub/project.yml` and `docs/live-project-integration.md`. PR mappings must come from observed GitHub records. Manifest preparation is not verified ingestion, current service health or credentialed telemetry.

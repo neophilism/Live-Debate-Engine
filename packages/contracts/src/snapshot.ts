@@ -3,6 +3,7 @@ import { canonicalJson, MAX_RECORD_BYTES } from './canonical.js';
 import { anyReference, entityKind, parseData, TENANT_KINDS, type DomainData, type EntityKind, type SnapshotReference } from './domain.js';
 import { dataObject, digest, identifier, integer, literal, nullable, object, reject, text, timestamp, type Parsed } from './validation.js';
 
+const scopeParser = object({ tenantId: identifier('tenant'), entityId: identifier('entity'), eventId: nullable(identifier('event')) });
 const metadata = object({
   schemaVersion: literal(1), kind: entityKind, tenantId: identifier('tenant'),
   entityId: identifier('entity'), eventId: nullable(identifier('event')), snapshotId: identifier('snapshot'),
@@ -14,6 +15,15 @@ export type Snapshot<K extends EntityKind = EntityKind> = Readonly<{ record: Rec
 export type SnapshotOptions = Readonly<{ snapshotId?: string; recordedAt?: string }>;
 export type EntityScope = Readonly<{ tenantId: string; entityId: string; eventId: string | null }>;
 export type ReferenceOf<K extends EntityKind> = Omit<SnapshotReference, 'kind'> & Readonly<{ kind: K }>;
+
+function generationOptions(value: SnapshotOptions) {
+  const options = dataObject(value);
+  if (Object.keys(options).some((key) => !['snapshotId', 'recordedAt'].includes(key))) reject('Unknown generation option');
+  return {
+    snapshotId: Object.hasOwn(options, 'snapshotId') ? identifier('snapshot')(options.snapshotId) : randomUUID(),
+    recordedAt: Object.hasOwn(options, 'recordedAt') ? timestamp(options.recordedAt) : new Date().toISOString(),
+  };
+}
 
 export function referencesIn(value: unknown): readonly SnapshotReference[] {
   const found = new Map<string, SnapshotReference>();
@@ -30,7 +40,6 @@ export function referencesIn(value: unknown): readonly SnapshotReference[] {
     }
     for (const nested of Object.values(item)) visit(nested);
   }
-  // Enforce cycles, size and descriptor limits before walking the plain parsed data.
   canonicalJson(value);
   visit(value);
   return Object.freeze([...found.values()]);
@@ -68,21 +77,20 @@ export function snapshotOf(record: unknown): Snapshot {
 
 export function initialSnapshot<K extends EntityKind>(kind: K, scope: EntityScope, data: unknown, options: SnapshotOptions = {}): Snapshot<K> {
   return snapshotOf({
-    schemaVersion: 1, kind, ...scope, data, revision: 1, previousSnapshotId: null,
-    snapshotId: options.snapshotId ?? randomUUID(), recordedAt: options.recordedAt ?? new Date().toISOString(),
+    ...scopeParser(scope), schemaVersion: 1, kind: entityKind(kind), data, revision: 1, previousSnapshotId: null,
+    ...generationOptions(options),
   }) as Snapshot<K>;
 }
 export function verifySnapshot<K extends EntityKind>(input: Snapshot<K>): Snapshot<K> {
-  const verified = snapshotOf(input.record);
-  if (verified.canonical !== input.canonical || verified.contentHash !== input.contentHash) reject('Snapshot content/hash mismatch');
+  const fields = dataObject(input);
+  if (Object.keys(fields).length !== 3 || !['record', 'canonical', 'contentHash'].every((key) => Object.hasOwn(fields, key))) reject('Invalid snapshot envelope');
+  const verified = snapshotOf(fields.record) as Snapshot<K>;
+  if (verified.canonical !== fields.canonical || verified.contentHash !== fields.contentHash) reject('Snapshot content/hash mismatch');
   return verified;
 }
 export function nextSnapshot<K extends EntityKind>(previous: Snapshot<K>, data: unknown, options: SnapshotOptions = {}): Snapshot<K> {
   const prior = verifySnapshot(previous).record;
-  return snapshotOf({
-    ...prior, data, revision: prior.revision + 1, previousSnapshotId: prior.snapshotId,
-    snapshotId: options.snapshotId ?? randomUUID(), recordedAt: options.recordedAt ?? new Date().toISOString(),
-  }) as Snapshot<K>;
+  return snapshotOf({ ...prior, data, revision: prior.revision + 1, previousSnapshotId: prior.snapshotId, ...generationOptions(options) }) as Snapshot<K>;
 }
 export function referenceOf<K extends EntityKind>(snapshot: Snapshot<K>): ReferenceOf<K> {
   const { kind, tenantId, entityId, eventId, snapshotId, revision } = verifySnapshot(snapshot).record;

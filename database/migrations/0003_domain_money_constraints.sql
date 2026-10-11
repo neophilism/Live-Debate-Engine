@@ -1,4 +1,4 @@
--- Structural money validation complements the strict application contract parser.
+-- Structural money, scope and receipt validation complements the application parser.
 CREATE FUNCTION lde.valid_money(value jsonb) RETURNS boolean
 LANGUAGE sql IMMUTABLE AS $body$
   SELECT coalesce(
@@ -12,7 +12,6 @@ LANGUAGE sql IMMUTABLE AS $body$
     AND jsonb_typeof(value->'exponent') = 'number'
     AND value->>'exponent' ~ '^[0-6]$', false);
 $body$;
-
 ALTER TABLE lde.revisions ADD CONSTRAINT declared_money_is_exact CHECK (
   CASE kind
     WHEN 'prize-obligation' THEN lde.valid_money(canonical_record::jsonb->'data'->'amount')
@@ -20,3 +19,16 @@ ALTER TABLE lde.revisions ADD CONSTRAINT declared_money_is_exact CHECK (
     WHEN 'tournament' THEN lde.valid_money(canonical_record::jsonb->'data'->'placementBudget')
     ELSE true END
 );
+-- NULL and an event equal to the tenant ID must not become interchangeable scope keys.
+ALTER TABLE lde.revisions ADD CONSTRAINT revision_scope_kind CHECK (
+  (kind IN ('tenant','series','motion','participant','team','ruleset','tournament')) = (event_id IS NULL)
+);
+ALTER TABLE lde.revision_references ADD CONSTRAINT reference_scope_kind CHECK (
+  (target_kind IN ('tenant','series','motion','participant','team','ruleset','tournament')) = (target_event_id IS NULL)
+);
+ALTER TABLE lde.revisions ADD CONSTRAINT complete_record_header CHECK (
+  canonical_record::jsonb ?& ARRAY['schemaVersion','kind','tenantId','entityId','eventId','snapshotId','revision','previousSnapshotId','recordedAt','data']
+);
+ALTER TABLE lde.revisions ADD CONSTRAINT receipt_snapshot_revision UNIQUE (tenant_id,snapshot_id,revision);
+ALTER TABLE lde.command_receipts ADD CONSTRAINT receipt_matches_revision
+  FOREIGN KEY (tenant_id,snapshot_id,revision) REFERENCES lde.revisions(tenant_id,snapshot_id,revision);

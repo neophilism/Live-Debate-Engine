@@ -1,13 +1,13 @@
 import { array, boolean, code, digest, enumeration, identifier, integer, literal, nullable, object, refine, text, timestamp, type Parsed, type Parser } from './validation.js';
 import { moneyParser } from './money.js';
 
-export const TENANT_KINDS = ['tenant', 'series', 'motion', 'participant', 'team', 'ruleset', 'tournament'] as const;
-export const EVENT_KINDS = ['event', 'assignment', 'contract', 'session', 'poll', 'ballot', 'scorecard', 'audience-verdict', 'judges-verdict', 'advancement-decision', 'prize-obligation', 'tournament-match', 'dispute'] as const;
-export const ENTITY_KINDS = [...TENANT_KINDS, ...EVENT_KINDS] as const;
+export const TENANT_KINDS = Object.freeze(['tenant', 'series', 'motion', 'participant', 'team', 'ruleset', 'tournament'] as const);
+export const EVENT_KINDS = Object.freeze(['event', 'assignment', 'contract', 'session', 'poll', 'ballot', 'scorecard', 'audience-verdict', 'judges-verdict', 'advancement-decision', 'prize-obligation', 'tournament-match', 'dispute'] as const);
+export const ENTITY_KINDS = Object.freeze([...TENANT_KINDS, ...EVENT_KINDS] as const);
 export type EntityKind = typeof ENTITY_KINDS[number];
 export const entityKind = enumeration(ENTITY_KINDS);
-export const ROLES = ['organizer', 'producer', 'moderator', 'timekeeper', 'debater', 'judge', 'audience', 'finance', 'oversight'] as const;
-export const PHASES = ['preparation', 'readiness', 'pre-vote', 'openings', 'discussion', 'questions', 'closings', 'post-vote', 'verification', 'announcement', 'closed', 'cancelled'] as const;
+export const ROLES = Object.freeze(['organizer', 'producer', 'moderator', 'timekeeper', 'debater', 'judge', 'audience', 'finance', 'oversight'] as const);
+export const PHASES = Object.freeze(['preparation', 'readiness', 'pre-vote', 'openings', 'discussion', 'questions', 'closings', 'post-vote', 'verification', 'announcement', 'closed', 'cancelled'] as const);
 export const side = enumeration(['for', 'against'] as const);
 export const outcome = enumeration(['for', 'against', 'tie', 'inconclusive'] as const);
 
@@ -17,8 +17,12 @@ const referenceFields = {
 };
 export const anyReference = object({ ...referenceFields, kind: entityKind });
 export type SnapshotReference = Parsed<typeof anyReference>;
-export function reference<const K extends EntityKind>(kind: K) { return object({ ...referenceFields, kind: literal(kind) }); }
-export function referenceList<const K extends EntityKind>(kind: K, min = 0, max = 100): Parser<readonly Parsed<ReturnType<typeof reference<K>>>[]> {
+export type KindReference<K extends EntityKind> = Omit<SnapshotReference, 'kind'> & Readonly<{ kind: K }>;
+export function reference<const K extends EntityKind>(kind: K) {
+  entityKind(kind);
+  return object({ ...referenceFields, kind: literal(kind) });
+}
+export function referenceList<const K extends EntityKind>(kind: K, min = 0, max = 100): Parser<readonly KindReference<K>[]> {
   return refine(array(reference(kind), min, max), (refs) => new Set(refs.map((ref) => ref.entityId)).size === refs.length, 'Duplicate referenced entity');
 }
 
@@ -32,7 +36,7 @@ const timeZone = refine(text(1, 100), (zone) => {
   try { new Intl.DateTimeFormat('en-US', { timeZone: zone }); return true; } catch { return false; }
 }, 'Unsupported time zone');
 
-export const dataParsers = {
+export const dataParsers = Object.freeze({
   tenant: object({ name: text(), slug: code }),
   series: object({ name: text() }),
   motion: object({ text: text(1, 20000) }),
@@ -61,7 +65,7 @@ export const dataParsers = {
   tournament: object({ name: text(), teams: referenceList('team', 2, 64), placementBudget: moneyParser }),
   'tournament-match': refine(object({ tournamentRef: reference('tournament'), round: integer(1, 16), slot: integer(1, 64), forTeamRef: nullable(reference('team')), againstTeamRef: nullable(reference('team')) }), (value) => !value.forTeamRef || !value.againstTeamRef || value.forTeamRef.entityId !== value.againstTeamRef.entityId, 'A team cannot face itself'),
   dispute: object({ subjectRef: refine(anyReference, (ref) => ['audience-verdict', 'judges-verdict', 'advancement-decision', 'scorecard', 'prize-obligation'].includes(ref.kind), 'Invalid dispute subject kind'), submittedByPrincipalId: identifier('principal'), reason: enumeration(['counting-error', 'scoring-error', 'eligibility', 'conduct', 'technical-error'] as const), evidenceObjectIds: array(identifier('protected-object'), 0, 100), status: enumeration(['open', 'reviewing', 'resolved'] as const) }),
-} as const;
+} as const);
 
 export type DomainData = { readonly [K in EntityKind]: Parsed<typeof dataParsers[K]> };
 export type AudienceVerdict = DomainData['audience-verdict'];
@@ -71,6 +75,6 @@ export type PrizeObligation = DomainData['prize-obligation'];
 
 /** Validation only; this does not authorize state changes, compute verdicts or qualify AI. */
 export function parseData<K extends EntityKind>(kind: K, value: unknown): DomainData[K] {
-  const parser = dataParsers[kind];
+  const parser = dataParsers[entityKind(kind)];
   return parser(value) as DomainData[K];
 }

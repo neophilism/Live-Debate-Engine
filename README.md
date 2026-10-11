@@ -4,11 +4,11 @@ A white-label operating platform for structured, motion-based debate competition
 
 ## Status
 
-The owner approved **50 engine steps (E01-E50)** and **4 branded steps (U01-U04)** on October 11, 2026. E01 is merged. E02 introduces a typed application foundation; consult [progress](repo-development-progress.md) and actual GitHub checks for its current acceptance state. The foundation is **not ready to run live competitions** and no cloud deployment or AI qualification is claimed.
+The owner approved **50 engine steps (E01-E50)** and **4 branded steps (U01-U04)** on October 11, 2026. E01 specification and E02 application foundation are merged with verified CI. E03 adds internal typed domain contracts and revision persistence; consult [progress](repo-development-progress.md) and its actual PR for acceptance state. This is **not ready to run live competitions**. No cloud deployment or AI qualification is claimed.
 
 ## Documentation
 
-[Approved plan](docs/DEVELOPMENT_PLAN.md) | [Requirements](docs/REQUIREMENTS.md) | [Decisions](docs/DECISIONS.md) | [Architecture](docs/ARCHITECTURE.md) | [Resources](docs/RESOURCES.md) | [Cloud access](docs/CLOUD_ACCESS.md) | [Local development](docs/DEVELOPMENT.md) | [Handoff](docs/HANDOFF.md) | [Security](SECURITY.md)
+[Approved plan](docs/DEVELOPMENT_PLAN.md) | [Requirements](docs/REQUIREMENTS.md) | [Decisions](docs/DECISIONS.md) | [Architecture](docs/ARCHITECTURE.md) | [Resources](docs/RESOURCES.md) | [Cloud access](docs/CLOUD_ACCESS.md) | [Local development](docs/DEVELOPMENT.md) | [Domain contracts](docs/DOMAIN_CONTRACTS.md) | [Handoff](docs/HANDOFF.md) | [Security](SECURITY.md)
 
 ## Local development
 
@@ -24,12 +24,12 @@ npm run check
 npm run dev
 ```
 
-The setup command creates an ignored, private local configuration with a random password; it never accesses Render or Neon. GET `/api/health` is liveness. GET `/api/ready` checks the migration schema. Both deliberately avoid implying competition readiness. No UI, registration or competition endpoint exists yet.
+Local setup creates an ignored private configuration with a random password; it never accesses Render or Neon. GET `/api/health` is liveness; `/api/ready` checks schema compatibility. Neither implies competition readiness. There is no UI, registration or public domain endpoint yet. E03 tables remain default-deny until E04 implements runtime identity and authorization policies.
 
-## Product invariants
+## Invariants
 
-Audience persuasion verdict, judges' quality verdict, tournament advancement and prize obligations are separate records. There is no single blended popularity/quality score. Standard prizes have independent audience and judging allocations; tournament placement awards use a separate budget.
+Audience persuasion verdict, judges' quality verdict, tournament advancement and prize obligations are separate records. No single blended popularity/quality score exists. Standard prizes have independent allocations; tournament placement awards use a separate budget.
 
-Event contracts freeze motion, electorate, rules, rubric, timing, prize schedule and deadlines. No interim vote distributions are published. Corrections preserve prior records. AI stays advisory until a specific configuration passes qualification and oversight gates.
+Event contracts freeze motion, electorate, rules, rubric, timing, prizes and deadlines. Interim vote distributions stay sealed. Corrections preserve prior revisions. AI remains advisory until a specific configuration passes qualification and oversight. Type definitions and hashes alone establish none of those operational approvals.
 
-Original source DOCX files, credentials, tax forms, ballots and private business-plan material must never be committed to this public repository. Approval to develop is not evidence of available prize funding, legal approval, production readiness or permission for new costs.
+Original source DOCX files, credentials, tax forms, ballots and private business-plan material must never be committed to this public repository. Approval to develop is not proof of funds, legal approval, readiness or authorization for new costs.

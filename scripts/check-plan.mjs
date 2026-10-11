@@ -44,7 +44,7 @@ export function checkRepository(root = new URL('../', import.meta.url)) {
     if (!references.length || references.some((id) => !ids.has(id)) || columns[5].trim().length < 15) throw new Error('Invalid traceability row');
   }
   const manifest = readFileSync(new URL('.exechub/project.yml', root), 'utf8');
-  const counts = [...manifest.matchAll(/^    prs: (\d+)$/gm)].map((match) => Number(match[1]));
+  const counts = [...manifest.matchAll(/^ {4}prs: (\d+)$/gm)].map((match) => Number(match[1]));
   if (!/planned_prs: 50\b/.test(manifest) || !/approved: true\b/.test(manifest) || counts.reduce((a, b) => a + b, 0) !== 50) throw new Error('Engine Room count differs from approved engine roadmap');
   const map = JSON.parse(readFileSync(new URL('docs/pr-map.json', root), 'utf8'));
   if (map.schema_version !== 1 || map.repository !== 'neophilism/Live-Debate-Engine' || !Array.isArray(map.mappings)) throw new Error('Invalid PR mapping');

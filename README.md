@@ -4,7 +4,7 @@ A white-label operating platform for structured, motion-based debate competition
 
 ## Status
 
-The owner approved **50 engine steps (E01-E50)** and **4 branded implementation steps (U01-U04)** on October 11, 2026. E01 specification, E02 application foundation, and E03 typed domain/revision persistence are merged with verified exact-head and merged-main CI. E04 identity and authorization is in development on draft PR #4; its first policy-evaluator slice does not implement a complete login or database authorization system.
+The owner approved **50 engine steps (E01-E50)** and **4 branded implementation steps (U01-U04)** on October 11, 2026. E01 specification, E02 application foundation, and E03 typed domain/revision persistence are merged with verified exact-head and merged-main CI. E04 real email/password authentication, session-bound MFA, audited administration and database authorization are implemented in draft PR #4 and undergoing exact-head acceptance. Check the PR before treating E04 as merged.
 
 This software is **not ready to run live competitions**. No cloud deployment, live ballot operation, payout, security certification or AI qualification is claimed. All reusable competition logic and interfaces belong in the engine, not the branded repository.
 
@@ -19,14 +19,15 @@ With the documented Node.js and Docker prerequisites:
 ```sh
 npm ci --ignore-scripts
 npm run setup:local
-docker compose up -d --wait
+docker compose --env-file .env.migrations up -d --wait
 npm run build
 npm run migrate
+npm run provision:local
 npm run check
 npm run dev
 ```
 
-Local setup creates an ignored private configuration; it never accesses Render or Neon. `/api/health` is liveness and `/api/ready` checks schema compatibility. Neither establishes competition readiness. There is no registration UI or public competition-domain endpoint yet. Domain tables retain default-deny row security until complete E04 runtime policies pass review.
+Local setup creates an ignored private configuration; it never accesses Render or Neon. `/api/health` is liveness and `/api/ready` checks schema compatibility. Neither establishes competition readiness. The configured identity API supports verified-email signup, login, MFA and revocation. No registration UI or competition-domain endpoint exists yet. Narrow read policies enforce identity, tenant/event scope and ownership; generic domain writes remain disabled.
 
 ## Invariants
 

@@ -91,6 +91,7 @@ const rules: Readonly<Record<Action, Rule>> = Object.freeze({
   'transcript.append': rule('event', [], ['transcription-worker']),
   'payout.execute': rule('event', [], ['payout-worker']),
 });
+export function describeAccessPolicy() { return rules; }
 const nonStaff = new Set<Role>(['audience', 'debater']);
 export type Denial = 'invalid-input' | 'identity-mismatch' | 'inactive-session' | 'inactive-membership'
   | 'scope-mismatch' | 'owner-mismatch' | 'missing-grant' | 'mfa-required';

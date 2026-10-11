@@ -1,17 +1,16 @@
 # Development progress
 
-Approved roadmap: 50 engine steps plus 4 separate UBC steps. Names finalized on 2026-10-11. Do not interpret equal-weight PR counts as effort estimates or readiness percentages.
+Approved: 50 engine steps, 4 separate UBC steps. Counts are not effort or production-readiness percentages.
 
-## Current checked state
+| Step | Actual PR | Verified state |
+|---|---|---|
+| E01 | #1 | Merged ddff3302b5ee3de0057fab1c459c4df7f607c923; exact-head run 38125095302 and main run 38125139802 passed; separate self-review recorded |
+| E02 | #2 | Foundation implemented on PR branch; lockfile bootstrap, final CI and security review pending |
+| E03-E50 | None | Not implemented |
+| U01-U04 | None | Not implemented; UBC remains empty; U01 waits for E47 |
 
-- Engine main was initialized with README commit `275f836230a34072cff88f1c2d1650faa65d75c1` so subsequent changes can use PRs.
-- E01 specification, traceability, decision register and roadmap validation: [PR #1](https://github.com/neophilism/Live-Debate-Engine/pull/1), in review. Merge and exact-head/main checks must be verified independently of this snapshot.
-- E02-E50: not implemented. U01-U04: not implemented; U01 waits for E47.
-- UBC Debates was inspected and is empty. No premature branded application has been created.
-- Render and Neon: supplied targets recorded, authenticated access unavailable in this session, no cloud mutations performed.
-- Engine Room: existing manifest contract inspected; manifest preparation is not verified ingestion.
-- Application, deployment, security qualification, AI qualification and live-event evidence: not yet available.
+E02 adds workspaces, strict compilation/lint, local PostgreSQL setup, checksum/transactional migrations, health/readiness endpoints, tests and CI artifacts. The foundation deliberately reports competitionReady:false. It does not collect live ballots, personal data or funds.
 
-## Evidence discipline
+Render and Neon now show installed, but available tool actions did not include them. Cloud targets remain unverified and unchanged. Engine Room's manifest contract is checked; actual ingestion/telemetry is unverified. Original source documents remain private.
 
-`docs/pr-map.json` records only actual observed PR numbers. PR reviews/comments and GitHub workflow runs contain exact-head and merged-main evidence. Each subsequent material transition updates this file and the handoff. Never mark a gate passed based on an intended future run.
+Actual PR mappings are in docs/pr-map.json. Check GitHub for exact current head, required workflows, reviews, merge and main evidence. Next eligible work: E03 after E02 gates. No unattended development or scheduler is running.

@@ -1,37 +1,35 @@
 # Live Debate Engine
 
-A white-label operating platform for structured, motion-based debate competitions. **UBC Debates** is the separate thin branded implementation in `neophilism/UBC-Debates`.
+A white-label operating platform for structured, motion-based debate competitions. **UBC Debates** is the separate thin branded implementation in `neophilism/UBC-Debates`. This is not the politician-to-politician debate product. All reusable competition rules, services, workflows and user interfaces belong here.
 
-This is not the politician-to-politician debate product. All reusable competition rules, services, workflows, and user interfaces belong in this engine.
+## Status
 
-## Development status
+The owner approved **50 engine steps (E01-E50)** and **4 branded steps (U01-U04)** on October 11, 2026. E01 is merged. E02 introduces a typed application foundation; consult [progress](repo-development-progress.md) and actual GitHub checks for its current acceptance state. The foundation is **not ready to run live competitions** and no cloud deployment or AI qualification is claimed.
 
-The owner approved the **50 engine steps (E01-E50)** and **4 branded implementation steps (U01-U04)** on October 11, 2026. Approval is authorization to develop, not evidence of implemented functionality, available prize funding, legal approval, infrastructure readiness, or AI qualification.
+## Documentation
 
-The repository currently contains specification and verification infrastructure. See [progress](repo-development-progress.md) for the latest checked state. There is no production-ready debate application yet.
+[Approved plan](docs/DEVELOPMENT_PLAN.md) | [Requirements](docs/REQUIREMENTS.md) | [Decisions](docs/DECISIONS.md) | [Architecture](docs/ARCHITECTURE.md) | [Resources](docs/RESOURCES.md) | [Cloud access](docs/CLOUD_ACCESS.md) | [Local development](docs/DEVELOPMENT.md) | [Handoff](docs/HANDOFF.md) | [Security](SECURITY.md)
 
-## Start here
+## Local development
 
-- [Complete approved development plan](docs/DEVELOPMENT_PLAN.md)
-- [Source requirements and traceability](docs/REQUIREMENTS.md)
-- [Policy decisions and unresolved approvals](docs/DECISIONS.md)
-- [Architecture and repository boundaries](docs/ARCHITECTURE.md)
-- [Authorized resource mapping](docs/RESOURCES.md)
-- [Handoff](docs/HANDOFF.md) and [security boundaries](SECURITY.md)
-
-## Invariants
-
-Audience persuasion verdict, judges' quality verdict, tournament advancement, and prize obligations are separate records. There is no single blended popularity/quality score. Standard prizes have independent audience and judging allocations; tournament placement awards are a separate budget.
-
-Event contracts freeze the motion, electorate, rules, rubric, timing, prize schedule, and deadlines. No interim vote distributions are published. Corrections preserve prior records. AI remains advisory unless a specific configuration passes explicit qualification and oversight gates.
-
-## Specification checks
-
-With Node.js 22 or 24:
+Use Node 24 (Node 22 is also tested) and Docker for local PostgreSQL:
 
 ```sh
-node scripts/check-plan.mjs
-node --test tests/plan.test.mjs
+npm ci --ignore-scripts
+npm run setup:local
+docker compose up -d --wait
+npm run build
+npm run migrate
+npm run check
+npm run dev
 ```
 
-The E01 checks validate roadmap structure and source coverage; they do not test an application. Application tooling and CI expansion are E02. No source DOCX files, credentials, tax forms, ballots, or private business-plan material should be committed here.
+The setup command creates an ignored, private local configuration with a random password; it never accesses Render or Neon. GET `/api/health` is liveness. GET `/api/ready` checks the migration schema. Both deliberately avoid implying competition readiness. No UI, registration or competition endpoint exists yet.
+
+## Product invariants
+
+Audience persuasion verdict, judges' quality verdict, tournament advancement and prize obligations are separate records. There is no single blended popularity/quality score. Standard prizes have independent audience and judging allocations; tournament placement awards use a separate budget.
+
+Event contracts freeze motion, electorate, rules, rubric, timing, prize schedule and deadlines. No interim vote distributions are published. Corrections preserve prior records. AI stays advisory until a specific configuration passes qualification and oversight gates.
+
+Original source DOCX files, credentials, tax forms, ballots and private business-plan material must never be committed to this public repository. Approval to develop is not evidence of available prize funding, legal approval, production readiness or permission for new costs.

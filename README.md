@@ -19,7 +19,7 @@ With the documented Node.js and Docker prerequisites:
 ```sh
 npm ci --ignore-scripts
 npm run setup:local
-docker compose --env-file .env up -d
+docker compose up -d --wait
 npm run build
 npm run migrate
 npm run check

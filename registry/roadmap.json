@@ -54,7 +54,9 @@
     {
       "id": "E-07",
       "title": "Versioned rulesets and event competition contracts",
-      "pullRequests": []
+      "pullRequests": [
+        10
+      ]
     },
     {
       "id": "E-08",

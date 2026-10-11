@@ -4,67 +4,458 @@
   "roadmapVersion": 1,
   "planVerified": true,
   "plannedPrCount": 50,
-  "observedAt": "2026-10-11T18:52:39.435Z",
+  "observedAt": "2026-10-11T23:22:30.242Z",
   "units": [
-    {"id":"E-01","title":"Source-of-truth specification and decision register","origin":"original","prs":[1]},
-    {"id":"E-02","title":"Repository, development environment, and CI","origin":"original","prs":[2]},
-    {"id":"E-03","title":"Domain model and immutable contracts","origin":"original","prs":[3]},
-    {"id":"E-04","title":"Identity, tenant isolation, and permissions","origin":"original","prs":[4]},
-    {"id":"E-05","title":"Security primitives and sensitive-data separation","origin":"original","prs":[6]},
-    {"id":"E-06","title":"Reusable interfaces and accessibility foundation","origin":"original","prs":[9]},
-    {"id":"E-07","title":"Versioned rulesets and event competition contracts","origin":"original","prs":[]},
-    {"id":"E-08","title":"Series, motions, and event administration","origin":"original","prs":[]},
-    {"id":"E-09","title":"Casting, teams, rosters, and judge assignments","origin":"original","prs":[]},
-    {"id":"E-10","title":"Eligibility, releases, and legal-document acceptance","origin":"original","prs":[]},
-    {"id":"E-11","title":"Scheduling, production preparation, and communications","origin":"original","prs":[]},
-    {"id":"E-12","title":"Audience recruitment, registration, and admission","origin":"original","prs":[]},
-    {"id":"E-13","title":"Authoritative event state machine","origin":"original","prs":[]},
-    {"id":"E-14","title":"Timers, floor control, and points of order","origin":"original","prs":[]},
-    {"id":"E-15","title":"Moderator, timekeeper, producer, and debater consoles","origin":"original","prs":[]},
-    {"id":"E-16","title":"Remote participation and media-room controls","origin":"original","prs":[]},
-    {"id":"E-17","title":"Recording and broadcast production","origin":"original","prs":[]},
-    {"id":"E-18","title":"Transcription, speaker attribution, and corrections","origin":"original","prs":[]},
-    {"id":"E-19","title":"Audience Q&A and conduct controls","origin":"original","prs":[]},
-    {"id":"E-20","title":"Secret-ballot service","origin":"original","prs":[]},
-    {"id":"E-21","title":"Poll orchestration and electorate locking","origin":"original","prs":[]},
-    {"id":"E-22","title":"Deterministic outcome calculation","origin":"original","prs":[]},
-    {"id":"E-23","title":"Paper/keypad fallback and reconciliation","origin":"original","prs":[]},
-    {"id":"E-24","title":"Human judging workspace","origin":"original","prs":[]},
-    {"id":"E-25","title":"Rubric, penalties, virtues, and aggregation","origin":"original","prs":[]},
-    {"id":"E-26","title":"Result verification, certification, and announcement","origin":"original","prs":[]},
-    {"id":"E-27","title":"Standard-debate prize ledger","origin":"original","prs":[]},
-    {"id":"E-28","title":"Tournament brackets and advancement","origin":"original","prs":[]},
-    {"id":"E-29","title":"Tournament placement prizes and special awards","origin":"original","prs":[]},
-    {"id":"E-30","title":"Disputes, sanctions, disqualification, and corrections","origin":"original","prs":[]},
-    {"id":"E-31","title":"Payee onboarding and payout execution","origin":"original","prs":[]},
-    {"id":"E-32","title":"Complete human-operated competition acceptance suite","origin":"original","prs":[]},
-    {"id":"E-33","title":"Public event experience and searchable archive","origin":"original","prs":[]},
-    {"id":"E-34","title":"Editorial publishing and distribution packages","origin":"original","prs":[]},
-    {"id":"E-35","title":"Access entitlements, memberships, tickets, and supporters","origin":"original","prs":[]},
-    {"id":"E-36","title":"Full white-label configuration","origin":"original","prs":[]},
-    {"id":"E-37","title":"Public API, SDK, webhooks, and Engine Room integration","origin":"original","prs":[]},
-    {"id":"E-38","title":"Rights-cleared evaluation data and annotation","origin":"original","prs":[]},
-    {"id":"E-39","title":"Argument analysis, fallacy detection, and virtue recognition","origin":"original","prs":[]},
-    {"id":"E-40","title":"AI scorecards and reproducible evaluation artifacts","origin":"original","prs":[]},
-    {"id":"E-41","title":"AI-assisted human judging","origin":"original","prs":[]},
-    {"id":"E-42","title":"Evaluation laboratory and oversight certification","origin":"original","prs":[]},
-    {"id":"E-43","title":"Hybrid and fully AI-judged execution modes","origin":"original","prs":[]},
-    {"id":"E-44","title":"Load, fault, security, and recovery qualification","origin":"original","prs":[]},
-    {"id":"E-45","title":"Production infrastructure and deployment","origin":"original","prs":[]},
-    {"id":"E-46","title":"Operational readiness and release evidence","origin":"original","prs":[]},
-    {"id":"E-47","title":"Engine V1 release and portability proof","origin":"original","prs":[]},
-    {"id":"E-48","title":"Field validation and model qualification","origin":"original","prs":[]},
-    {"id":"E-49","title":"Controlled official hybrid-judging rollout","origin":"original","prs":[]},
-    {"id":"E-50","title":"Fully AI-judged mode qualification and rollout","origin":"original","prs":[]}
+    {
+      "id": "E-01",
+      "title": "Source-of-truth specification and decision register",
+      "origin": "original",
+      "prs": [
+        1
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "Repository, development environment, and CI",
+      "origin": "original",
+      "prs": [
+        2
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "Domain model and immutable contracts",
+      "origin": "original",
+      "prs": [
+        3
+      ]
+    },
+    {
+      "id": "E-04",
+      "title": "Identity, tenant isolation, and permissions",
+      "origin": "original",
+      "prs": [
+        4
+      ]
+    },
+    {
+      "id": "E-05",
+      "title": "Security primitives and sensitive-data separation",
+      "origin": "original",
+      "prs": [
+        6
+      ]
+    },
+    {
+      "id": "E-06",
+      "title": "Reusable interfaces and accessibility foundation",
+      "origin": "original",
+      "prs": [
+        9
+      ]
+    },
+    {
+      "id": "E-07",
+      "title": "Versioned rulesets and event competition contracts",
+      "origin": "original",
+      "prs": [
+        10
+      ]
+    },
+    {
+      "id": "E-08",
+      "title": "Series, motions, and event administration",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-09",
+      "title": "Casting, teams, rosters, and judge assignments",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-10",
+      "title": "Eligibility, releases, and legal-document acceptance",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-11",
+      "title": "Scheduling, production preparation, and communications",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-12",
+      "title": "Audience recruitment, registration, and admission",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-13",
+      "title": "Authoritative event state machine",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-14",
+      "title": "Timers, floor control, and points of order",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-15",
+      "title": "Moderator, timekeeper, producer, and debater consoles",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-16",
+      "title": "Remote participation and media-room controls",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-17",
+      "title": "Recording and broadcast production",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-18",
+      "title": "Transcription, speaker attribution, and corrections",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-19",
+      "title": "Audience Q&A and conduct controls",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-20",
+      "title": "Secret-ballot service",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-21",
+      "title": "Poll orchestration and electorate locking",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-22",
+      "title": "Deterministic outcome calculation",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-23",
+      "title": "Paper/keypad fallback and reconciliation",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-24",
+      "title": "Human judging workspace",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-25",
+      "title": "Rubric, penalties, virtues, and aggregation",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-26",
+      "title": "Result verification, certification, and announcement",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-27",
+      "title": "Standard-debate prize ledger",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-28",
+      "title": "Tournament brackets and advancement",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-29",
+      "title": "Tournament placement prizes and special awards",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-30",
+      "title": "Disputes, sanctions, disqualification, and corrections",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-31",
+      "title": "Payee onboarding and payout execution",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-32",
+      "title": "Complete human-operated competition acceptance suite",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-33",
+      "title": "Public event experience and searchable archive",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-34",
+      "title": "Editorial publishing and distribution packages",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-35",
+      "title": "Access entitlements, memberships, tickets, and supporters",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-36",
+      "title": "Full white-label configuration",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-37",
+      "title": "Public API, SDK, webhooks, and Engine Room integration",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-38",
+      "title": "Rights-cleared evaluation data and annotation",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-39",
+      "title": "Argument analysis, fallacy detection, and virtue recognition",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-40",
+      "title": "AI scorecards and reproducible evaluation artifacts",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-41",
+      "title": "AI-assisted human judging",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-42",
+      "title": "Evaluation laboratory and oversight certification",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-43",
+      "title": "Hybrid and fully AI-judged execution modes",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-44",
+      "title": "Load, fault, security, and recovery qualification",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-45",
+      "title": "Production infrastructure and deployment",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-46",
+      "title": "Operational readiness and release evidence",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-47",
+      "title": "Engine V1 release and portability proof",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-48",
+      "title": "Field validation and model qualification",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-49",
+      "title": "Controlled official hybrid-judging rollout",
+      "origin": "original",
+      "prs": []
+    },
+    {
+      "id": "E-50",
+      "title": "Fully AI-judged mode qualification and rollout",
+      "origin": "original",
+      "prs": []
+    }
   ],
   "pullRequests": [
-    {"id":4821368108,"number":9,"title":"E06: Reusable browser interfaces and accessibility foundation","url":"https://github.com/neophilism/Live-Debate-Engine/pull/9","state":"open","draft":true,"createdAt":"2026-10-11T18:35:43.000Z","updatedAt":"2026-10-11T18:35:43.000Z","closedAt":null,"mergedAt":null,"headSha":"ae7d0d927735a34140bcd08d8cfedf708a69cbea","baseRef":"main","mergeCommitSha":null},
-    {"id":4820981365,"number":7,"title":"E05: Protected storage, upload quarantine, key lifecycle and audited asset access","url":"https://github.com/neophilism/Live-Debate-Engine/pull/7","state":"closed","draft":true,"createdAt":"2026-10-11T17:35:08.000Z","updatedAt":"2026-10-11T17:36:44.000Z","closedAt":"2026-10-11T17:36:44.000Z","mergedAt":null,"headSha":"20944710382a53c0e61bf6ba26fff35f3b342d57","baseRef":"main","mergeCommitSha":"8c4e86920028b6d379e02763c9f9588618d47658"},
-    {"id":4820366699,"number":6,"title":"E05: Protected objects, key lifecycle, and quarantine","url":"https://github.com/neophilism/Live-Debate-Engine/pull/6","state":"closed","draft":false,"createdAt":"2026-10-11T16:00:17.000Z","updatedAt":"2026-10-11T17:37:42.000Z","closedAt":"2026-10-11T17:37:42.000Z","mergedAt":"2026-10-11T17:37:42.000Z","headSha":"367fef100dd88561a938d0867f69dda69d231c66","baseRef":"main","mergeCommitSha":"1751389581fa0e305b92967d2646fa7ed9f92977"},
-    {"id":4820012883,"number":5,"title":"Publish approved 50-step canonical roadmap for Engine Room","url":"https://github.com/neophilism/Live-Debate-Engine/pull/5","state":"closed","draft":false,"createdAt":"2026-10-11T15:06:01.000Z","updatedAt":"2026-10-11T17:11:37.000Z","closedAt":"2026-10-11T17:11:37.000Z","mergedAt":"2026-10-11T17:11:37.000Z","headSha":"2966cebf799b658a4efaf83df563852f0964c82d","baseRef":"main","mergeCommitSha":"efaa4389315e6ef5d6c50a173ed8a975d4c7d42b"},
-    {"id":4818056942,"number":4,"title":"E04: Identity, scoped permissions, and session assurance","url":"https://github.com/neophilism/Live-Debate-Engine/pull/4","state":"closed","draft":false,"createdAt":"2026-10-11T09:28:23.000Z","updatedAt":"2026-10-11T15:25:49.000Z","closedAt":"2026-10-11T15:25:49.000Z","mergedAt":"2026-10-11T15:25:49.000Z","headSha":"8ab385a8d26809a87c6f05a9cb9b6845c9de2753","baseRef":"main","mergeCommitSha":"fc40637f2c0af08e7b31e43b1570207922b0e1b7"},
-    {"id":4817900740,"number":3,"title":"E03: Typed domain contracts, exact money, and immutable revision persistence","url":"https://github.com/neophilism/Live-Debate-Engine/pull/3","state":"closed","draft":false,"createdAt":"2026-10-11T08:59:47.000Z","updatedAt":"2026-10-11T09:28:50.000Z","closedAt":"2026-10-11T09:22:46.000Z","mergedAt":"2026-10-11T09:22:46.000Z","headSha":"74466c3d825e1708dec9a098e2f9b3e905f0f6db","baseRef":"main","mergeCommitSha":"01c90b1dc016667572c08f23190f66cadb0b028d"},
-    {"id":4817772491,"number":2,"title":"E02: Reproducible TypeScript foundation, migrations, and CI","url":"https://github.com/neophilism/Live-Debate-Engine/pull/2","state":"closed","draft":false,"createdAt":"2026-10-11T08:36:42.000Z","updatedAt":"2026-10-11T08:49:02.000Z","closedAt":"2026-10-11T08:49:02.000Z","mergedAt":"2026-10-11T08:49:02.000Z","headSha":"7f9198727772bbcf2ed554714d120c05e6ad379a","baseRef":"main","mergeCommitSha":"e29a302fdeb348b0f2185ee181c83203a85e05e5"},
-    {"id":4817733245,"number":1,"title":"E01: Approved specification, source traceability, and project boundaries","url":"https://github.com/neophilism/Live-Debate-Engine/pull/1","state":"closed","draft":false,"createdAt":"2026-10-11T08:29:32.000Z","updatedAt":"2026-10-11T08:32:04.000Z","closedAt":"2026-10-11T08:32:04.000Z","mergedAt":"2026-10-11T08:32:04.000Z","headSha":"fa099086149b43a3a636c8e6880fa8882b2f3a78","baseRef":"main","mergeCommitSha":"ddff3302b5ee3de0057fab1c459c4df7f607c923"}
+    {
+      "id": 4821857279,
+      "number": 10,
+      "title": "E07: Versioned rulesets and acknowledged competition contracts",
+      "url": "https://github.com/neophilism/Live-Debate-Engine/pull/10",
+      "state": "open",
+      "draft": true,
+      "createdAt": "2026-10-11T19:50:19.000Z",
+      "updatedAt": "2026-10-11T19:50:19.000Z",
+      "closedAt": null,
+      "mergedAt": null,
+      "headSha": "1a1bfde5223e0ded451a1400b42e5ea6abbfc052",
+      "baseRef": "main",
+      "mergeCommitSha": null
+    },
+    {
+      "id": 4821368108,
+      "number": 9,
+      "title": "E06: Reusable browser interfaces and accessibility foundation",
+      "url": "https://github.com/neophilism/Live-Debate-Engine/pull/9",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-11T18:35:43.000Z",
+      "updatedAt": "2026-10-11T19:27:00.000Z",
+      "closedAt": "2026-10-11T19:24:09.000Z",
+      "mergedAt": "2026-10-11T19:24:09.000Z",
+      "headSha": "a3f6004111ea0a2596c6d7497bfeee1acb927977",
+      "baseRef": "main",
+      "mergeCommitSha": "821eef2c6b0f8f5c543e27bcefba74674232d66e"
+    },
+    {
+      "id": 4820981365,
+      "number": 7,
+      "title": "E05: Protected storage, upload quarantine, key lifecycle and audited asset access",
+      "url": "https://github.com/neophilism/Live-Debate-Engine/pull/7",
+      "state": "closed",
+      "draft": true,
+      "createdAt": "2026-10-11T17:35:08.000Z",
+      "updatedAt": "2026-10-11T17:36:44.000Z",
+      "closedAt": "2026-10-11T17:36:44.000Z",
+      "mergedAt": null,
+      "headSha": "20944710382a53c0e61bf6ba26fff35f3b342d57",
+      "baseRef": "main",
+      "mergeCommitSha": "8c4e86920028b6d379e02763c9f9588618d47658"
+    },
+    {
+      "id": 4820366699,
+      "number": 6,
+      "title": "E05: Protected objects, key lifecycle, and quarantine",
+      "url": "https://github.com/neophilism/Live-Debate-Engine/pull/6",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-11T16:00:17.000Z",
+      "updatedAt": "2026-10-11T17:37:42.000Z",
+      "closedAt": "2026-10-11T17:37:42.000Z",
+      "mergedAt": "2026-10-11T17:37:42.000Z",
+      "headSha": "367fef100dd88561a938d0867f69dda69d231c66",
+      "baseRef": "main",
+      "mergeCommitSha": "1751389581fa0e305b92967d2646fa7ed9f92977"
+    },
+    {
+      "id": 4820012883,
+      "number": 5,
+      "title": "Publish approved 50-step canonical roadmap for Engine Room",
+      "url": "https://github.com/neophilism/Live-Debate-Engine/pull/5",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-11T15:06:01.000Z",
+      "updatedAt": "2026-10-11T17:11:37.000Z",
+      "closedAt": "2026-10-11T17:11:37.000Z",
+      "mergedAt": "2026-10-11T17:11:37.000Z",
+      "headSha": "2966cebf799b658a4efaf83df563852f0964c82d",
+      "baseRef": "main",
+      "mergeCommitSha": "efaa4389315e6ef5d6c50a173ed8a975d4c7d42b"
+    },
+    {
+      "id": 4818056942,
+      "number": 4,
+      "title": "E04: Identity, scoped permissions, and session assurance",
+      "url": "https://github.com/neophilism/Live-Debate-Engine/pull/4",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-11T09:28:23.000Z",
+      "updatedAt": "2026-10-11T15:25:49.000Z",
+      "closedAt": "2026-10-11T15:25:49.000Z",
+      "mergedAt": "2026-10-11T15:25:49.000Z",
+      "headSha": "8ab385a8d26809a87c6f05a9cb9b6845c9de2753",
+      "baseRef": "main",
+      "mergeCommitSha": "fc40637f2c0af08e7b31e43b1570207922b0e1b7"
+    },
+    {
+      "id": 4817900740,
+      "number": 3,
+      "title": "E03: Typed domain contracts, exact money, and immutable revision persistence",
+      "url": "https://github.com/neophilism/Live-Debate-Engine/pull/3",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-11T08:59:47.000Z",
+      "updatedAt": "2026-10-11T09:28:50.000Z",
+      "closedAt": "2026-10-11T09:22:46.000Z",
+      "mergedAt": "2026-10-11T09:22:46.000Z",
+      "headSha": "74466c3d825e1708dec9a098e2f9b3e905f0f6db",
+      "baseRef": "main",
+      "mergeCommitSha": "01c90b1dc016667572c08f23190f66cadb0b028d"
+    },
+    {
+      "id": 4817772491,
+      "number": 2,
+      "title": "E02: Reproducible TypeScript foundation, migrations, and CI",
+      "url": "https://github.com/neophilism/Live-Debate-Engine/pull/2",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-11T08:36:42.000Z",
+      "updatedAt": "2026-10-11T08:49:02.000Z",
+      "closedAt": "2026-10-11T08:49:02.000Z",
+      "mergedAt": "2026-10-11T08:49:02.000Z",
+      "headSha": "7f9198727772bbcf2ed554714d120c05e6ad379a",
+      "baseRef": "main",
+      "mergeCommitSha": "e29a302fdeb348b0f2185ee181c83203a85e05e5"
+    },
+    {
+      "id": 4817733245,
+      "number": 1,
+      "title": "E01: Approved specification, source traceability, and project boundaries",
+      "url": "https://github.com/neophilism/Live-Debate-Engine/pull/1",
+      "state": "closed",
+      "draft": false,
+      "createdAt": "2026-10-11T08:29:32.000Z",
+      "updatedAt": "2026-10-11T08:32:04.000Z",
+      "closedAt": "2026-10-11T08:32:04.000Z",
+      "mergedAt": "2026-10-11T08:32:04.000Z",
+      "headSha": "fa099086149b43a3a636c8e6880fa8882b2f3a78",
+      "baseRef": "main",
+      "mergeCommitSha": "ddff3302b5ee3de0057fab1c459c4df7f607c923"
+    }
   ]
 }

@@ -3,14 +3,15 @@ import assert from 'node:assert/strict';
 import pg from 'pg';
 import { databaseConfig } from '../../dist/packages/database/src/config.js';
 import { applyMigrations, loadMigrations, migration, schemaCompatible } from '../../dist/packages/database/src/migrations.js';
+import { runDomainCases } from './domain-cases.mjs';
+import { runBoundaryCases } from './boundary-cases.mjs';
 
-// This suite intentionally fails rather than silently skips when its disposable DB is absent.
 const connection = process.env.TEST_DATABASE_URL;
 if (!connection || process.env.NODE_ENV !== 'test') throw new Error('A disposable local lde_ci database and NODE_ENV=test are required');
 const target = new URL(connection);
 if (!['127.0.0.1', 'localhost'].includes(target.hostname) || target.pathname !== '/lde_ci') throw new Error('Refusing destructive integration setup outside local lde_ci');
 
-test('real PostgreSQL migrations, atomicity, history and concurrency', async (t) => {
+test('real PostgreSQL migrations and domain persistence', async (t) => {
   const pool = new pg.Pool(databaseConfig(connection, { NODE_ENV: 'test', LDE_ALLOW_INSECURE_LOCAL_DB: '1' }));
   t.after(() => pool.end());
   await pool.query('DROP SCHEMA IF EXISTS engine_meta CASCADE; DROP SCHEMA IF EXISTS lde CASCADE');
@@ -38,4 +39,6 @@ test('real PostgreSQL migrations, atomicity, history and concurrency', async (t)
     const next = migration(`${String(entries.length + 1).padStart(4, '0')}_next.sql`, 'SELECT 1;');
     assert.equal(await schemaCompatible(pool, [...entries, next]), false);
   });
+  await t.test('domain contracts and transactional history', async (nested) => runDomainCases(nested, pool));
+  await t.test('structural boundary regressions', async (nested) => runBoundaryCases(nested, pool));
 });

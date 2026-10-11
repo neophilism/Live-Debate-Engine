@@ -25,13 +25,16 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: ${{ matrix.node }}
-      - name: Generate candidate lock only when absent (not merge evidence)
+      - name: Capture tracked source for exact-head review
+        if: matrix.node == '24'
         run: |
-          if [ ! -f package-lock.json ]; then npm install --package-lock-only --ignore-scripts; fi
+          mkdir -p artifacts
+          git archive --format=tar --output=artifacts/source.tar HEAD
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: matrix.node == '24'
         with:
-          name: lock-candidate-${{ matrix.node }}
-          path: package-lock.json
+          name: source-review
+          path: artifacts/source.tar
           retention-days: 7
           if-no-files-found: error
       - name: Require reviewed committed lockfile
@@ -47,12 +50,16 @@ jobs:
           retention-days: 7
           if-no-files-found: error
   database:
-    name: PostgreSQL integration
+    name: ${{ matrix.postgres == '17' && 'PostgreSQL integration' || 'PostgreSQL 18 compatibility' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        postgres: ['17', '18']
     services:
       postgres:
-        image: postgres:17
+        image: postgres:${{ matrix.postgres }}
         env:
           POSTGRES_DB: lde_ci
           POSTGRES_USER: lde_ci

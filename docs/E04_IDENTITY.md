@@ -1,6 +1,6 @@
 # E04 identity and authorization
 
-Implementation is under review in PR #4. Do not infer acceptance from this document: verify the current exact-head workflow and separate security review. E01-E03 are merged; see E03_EVIDENCE.md. UBC Debates is untouched.
+PR #4 merged at fc40637f2c0af08e7b31e43b1570207922b0e1b7 after exact-head CI 38151000137 and separate security self-review 5483835591. Merged-main CI 38151234814 passed all five jobs. E01-E04 are merged; UBC Debates is untouched.
 
 ## Implemented boundaries
 

@@ -4,13 +4,13 @@ A white-label operating platform for structured, motion-based debate competition
 
 ## Status
 
-The owner approved **50 engine steps (E01-E50)** and **4 branded implementation steps (U01-U04)** on October 11, 2026. E01 specification, E02 application foundation, and E03 typed domain/revision persistence are merged with verified exact-head and merged-main CI. E04 real email/password authentication, session-bound MFA, audited administration and database authorization are implemented in draft PR #4 and undergoing exact-head acceptance. Check the PR before treating E04 as merged.
+The approved roadmap contains 50 engine steps and four later UBC steps. E01-E04 are merged with verified exact-head and merged-main CI. E05 protected storage is in development: encrypted private objects, quarantine, signed session-bound access, key lifecycle and auditing. See progress and actual PR records for acceptance, not just this snapshot.
 
-This software is **not ready to run live competitions**. No cloud deployment, live ballot operation, payout, security certification or AI qualification is claimed. All reusable competition logic and interfaces belong in the engine, not the branded repository.
+This is not yet a live competition platform. The engine remains separate from the politician-debate product and owns all reusable competition functionality; UBC Debates is not being implemented in parallel.
 
 ## Documentation
 
-[Approved plan](docs/DEVELOPMENT_PLAN.md) | [Requirements](docs/REQUIREMENTS.md) | [Decisions](docs/DECISIONS.md) | [Architecture](docs/ARCHITECTURE.md) | [Resources](docs/RESOURCES.md) | [Cloud access](docs/CLOUD_ACCESS.md) | [Local development](docs/DEVELOPMENT.md) | [Domain contracts](docs/DOMAIN_CONTRACTS.md) | [E03 evidence](docs/E03_EVIDENCE.md) | [E04 work](docs/E04_IDENTITY.md) | [Progress](repo-development-progress.md) | [Handoff](docs/HANDOFF.md) | [Security](SECURITY.md)
+[Approved plan](docs/DEVELOPMENT_PLAN.md) | [Requirements](docs/REQUIREMENTS.md) | [Decisions](docs/DECISIONS.md) | [Architecture](docs/ARCHITECTURE.md) | [Resources](docs/RESOURCES.md) | [Cloud access](docs/CLOUD_ACCESS.md) | [Local development](docs/DEVELOPMENT.md) | [Domain contracts](docs/DOMAIN_CONTRACTS.md) | [E03 evidence](docs/E03_EVIDENCE.md) | [E04 work](docs/E04_IDENTITY.md) | [Protected storage](docs/E05_PROTECTED_STORAGE.md) | [Progress](repo-development-progress.md) | [Handoff](docs/HANDOFF.md) | [Security](SECURITY.md)
 
 ## Local development
 

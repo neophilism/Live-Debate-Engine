@@ -1,13 +1,15 @@
 import { createServer, type Server } from 'node:http';
+import type { ObjectHttpRuntime } from '../../../packages/security/src/http.js';
 import type { IdentityRuntime } from '../../../packages/identity/src/http.js';
 import { ENGINE_VERSION, type HealthResponse, type Readiness } from '../../../packages/contracts/src/index.js';
 
-export type ApiOptions = Readonly<{ readiness: () => Promise<Readiness>; release?: string; identity?: IdentityRuntime }>;
+export type ApiOptions = Readonly<{ readiness: () => Promise<Readiness>; release?: string; identity?: IdentityRuntime; objects?: ObjectHttpRuntime }>;
 
 export function createApi(options: ApiOptions): Server {
   const release = options.release && /^[a-f0-9]{40}$/.test(options.release) ? options.release : null;
   const health: HealthResponse = Object.freeze({ status: 'alive', product: 'Live Debate Engine', version: ENGINE_VERSION, release, stage: 'foundation', competitionReady: false });
   const server = createServer(async (request, response) => {
+    if (options.objects && await options.objects.handle(request, response)) return;
     if (options.identity && await options.identity.handle(request, response)) return;
     const send = (status: number, body: object) => {
       const json = JSON.stringify(body);

@@ -33,7 +33,7 @@ test('real browser account, security, scoped workspaces and protected files unde
   // Fail immediately when the browser cannot reach the local test server; do not cascade setup failures.
   await page.goto(origin);
   await t.test('public UI uses strict local assets, keyboard entry and accessible labels', async () => {
-    await page.goto(origin); await page.getByRole('link', { name: 'Forum House home' }).waitFor();
+    await page.goto(origin); await page.getByRole('link', { name: 'Forum House Competition workspace home' }).waitFor();
     await page.keyboard.press('Tab'); assert.equal(await page.locator(':focus').innerText(), 'Skip to content');
     await page.keyboard.press('Enter'); assert.equal(await page.locator(':focus').getAttribute('id'), 'main-content');
     await audit(page); await page.screenshot({ path: 'artifacts/ui/forum-home.png', fullPage: true });
@@ -123,7 +123,7 @@ test('real browser account, security, scoped workspaces and protected files unde
   });
   await t.test('another neutral brand uses exactly the same bundle and passes mobile/keyboard checks', async () => {
     const civic = await f.start('civic-exchange'); const separate = await runtime.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' }); const p = await separate.newPage();
-    await p.goto(civic.origin); await p.getByRole('link', { name: 'Civic Exchange home' }).waitFor(); await audit(p);
+    await p.goto(civic.origin); await p.getByRole('link', { name: 'Civic Exchange Competition workspace home' }).waitFor(); await audit(p);
     assert.ok(!(await p.locator('body').innerText()).includes('Forum House')); assert.ok(!(await p.locator('body').innerText()).includes('UBC'));
     const [one, two] = await Promise.all([fetch(`${origin}/assets/app.js`).then((v) => v.text()), fetch(`${civic.origin}/assets/app.js`).then((v) => v.text())]); assert.equal(one, two);
     await p.keyboard.press('Tab'); assert.equal(await p.locator(':focus').innerText(), 'Skip to content'); await p.keyboard.press('Enter');

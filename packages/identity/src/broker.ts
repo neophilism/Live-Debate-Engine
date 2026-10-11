@@ -15,7 +15,7 @@ export async function assertDatabaseRole(pool: Pool, kind: 'runtime' | 'identity
     AND pg_has_role(current_user,$1,'USAGE') AND NOT pg_has_role(current_user,'lde_guard','MEMBER')
     AND NOT pg_has_role(current_user,$2,'MEMBER')
     AND NOT EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
-      WHERE n.nspname IN ('lde','lde_auth','lde_security','engine_meta') AND pg_has_role(current_user,c.relowner,'MEMBER')) AS safe
+      WHERE n.nspname IN ('lde','lde_auth','lde_security','engine_meta','lde_storage') AND pg_has_role(current_user,c.relowner,'MEMBER')) AS safe
     FROM pg_roles r WHERE r.rolname=current_user`, [kind === 'runtime' ? 'lde_runtime' : 'lde_identity', kind === 'runtime' ? 'lde_identity' : 'lde_runtime']);
   if (result.rows[0]?.safe !== true) throw new Error('Unsafe database role for identity or competition runtime');
 }

@@ -10,11 +10,11 @@ export const ACTIONS = Object.freeze([
   'media.control', 'question.submit', 'question.moderate', 'ballot.cast-own',
   'scorecard.read-own', 'scorecard.write-own', 'result.verify', 'result.publish',
   'prize.manage', 'payout.approve', 'dispute.review', 'ballot.read-sealed',
-  'tally.write', 'transcript.append', 'payout.execute',
+  'tally.write', 'transcript.append', 'payout.execute', 'object.scan',
 ] as const);
 export type Action = typeof ACTIONS[number];
 export type Role = typeof ROLES[number];
-export const SERVICE_PROFILES = Object.freeze(['transcription-worker', 'tally-worker', 'payout-worker'] as const);
+export const SERVICE_PROFILES = Object.freeze(['transcription-worker', 'tally-worker', 'payout-worker', 'upload-scanner'] as const);
 export type ServiceProfile = typeof SERVICE_PROFILES[number];
 
 const actorKind = enumeration(['human', 'service'] as const);
@@ -90,6 +90,7 @@ const rules: Readonly<Record<Action, Rule>> = Object.freeze({
   'tally.write': rule('event', [], ['tally-worker']),
   'transcript.append': rule('event', [], ['transcription-worker']),
   'payout.execute': rule('event', [], ['payout-worker']),
+  'object.scan': rule('event', [], ['upload-scanner']),
 });
 export function describeAccessPolicy() { return rules; }
 const nonStaff = new Set<Role>(['audience', 'debater']);

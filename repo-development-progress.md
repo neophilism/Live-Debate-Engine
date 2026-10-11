@@ -7,12 +7,13 @@ Approved: 50 engine steps and four separate UBC steps. Counts are not effort or 
 | E01 | #1 | Merged ddff3302b5ee3de0057fab1c459c4df7f607c923; exact-head CI 38125095302 and main CI 38125139802 passed |
 | E02 | #2 | Merged e29a302fdeb348b0f2185ee181c83203a85e05e5; exact-head CI 38126067565 and main CI 38126144646 passed; separate security self-review 5482622645 |
 | E03 | #3 | Merged 01c90b1dc016667572c08f23190f66cadb0b028d; all five jobs passed on exact-head CI 38127969980 and main CI 38128158515; separate security self-review 5482733931 |
-| E04 | #4 (draft pending acceptance) | Real provider authentication, session-bound MFA, recovery/revocation, database isolation, scoped workers and operator auditing implemented. Locally 118 unit/API/contract and 36 PostgreSQL cases passed. Final remote CI/review/merge remain to be observed. |
-| E05-E50 | None | Not implemented |
+| E04 | #4 | Merged fc40637f2c0af08e7b31e43b1570207922b0e1b7; exact-head CI 38151000137 and main CI 38151234814 passed all five jobs; separate self-review 5483835591 |
+| E05 | #6 | Protected storage, quarantine, signed access, keys and audit implemented locally; 128 unit/API/contract and 46 PostgreSQL cases pass. Exact-head hosted checks/review/merge pending. |
+| E06-E50 | None | Not implemented |
 | U01-U04 | None | Not begun; U01 waits for E47 |
 
-The engine is not competition-ready: generic domain writes, user interfaces, live voting, judging, media, prizes and AI still have their own approved steps. Health/schema readiness continues to report competitionReady:false. Passing identity tests does not establish those later capabilities.
+The engine is not competition-ready: generic competition-domain writes, user interfaces, live voting, judging, media, prizes and AI still have their own approved steps. Health/schema readiness continues to report competitionReady:false. Passing identity tests does not establish those later capabilities.
 
 Authenticated Render and Neon actions work. Exact Neon project/branch pairs are verified production branches on PostgreSQL 18. No cloud resources were mutated. Render project-container membership remains unverified with the current action set; the unrelated Debate-Engine service was not reused. See CLOUD_ACCESS.md.
 
-Engine Room manifest preparation is not confirmed ingestion. Private source documents and real personal/financial data remain outside this public repository. See E04_IDENTITY.md and actual PR/check records for current acceptance state. No unattended development or recurring scheduler is running.
+Engine Room manifest preparation is not confirmed ingestion. Private source documents and real personal/financial data remain outside this public repository. Auxiliary roadmap PR #5 is preserved; temporary duplicate PR #7 is consolidated into #6 and is not a completed engine step. See E04_IDENTITY.md and actual PR/check records for current acceptance state. No unattended development or recurring scheduler is running.

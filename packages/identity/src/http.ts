@@ -55,6 +55,7 @@ function send(response: ServerResponse, status: number, value: unknown, cookies?
 
 export type IdentityRuntime = Readonly<{
   provider: IdentityProvider;
+  authenticate: (request: IncomingMessage) => Promise<{ token: string; actor: Actor }>;
   drain: () => Promise<void>;
   handle: (request: IncomingMessage, response: ServerResponse) => Promise<boolean>;
 }>;
@@ -145,5 +146,5 @@ export async function createIdentityRuntime(options: IdentityOptions & Readonly<
     }
     return true;
   }
-  return Object.freeze({ provider, handle, drain: async () => { await Promise.all([...tasks]); } });
+  return Object.freeze({ provider, handle, authenticate: current, drain: async () => { await Promise.all([...tasks]); } });
 }

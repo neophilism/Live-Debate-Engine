@@ -1,3 +1,4 @@
+import { runCompetitionCases } from './competition-cases.mjs';
 import { runStorageCases } from './storage-cases.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -16,7 +17,7 @@ if (!['127.0.0.1', 'localhost'].includes(target.hostname) || target.pathname !==
 test('real PostgreSQL migrations and domain persistence', async (t) => {
   const pool = new pg.Pool(databaseConfig(connection, { NODE_ENV: 'test', LDE_ALLOW_INSECURE_LOCAL_DB: '1' }));
   t.after(() => pool.end());
-  await pool.query('DROP SCHEMA IF EXISTS lde_storage CASCADE; DROP SCHEMA IF EXISTS lde_security CASCADE; DROP SCHEMA IF EXISTS lde_auth CASCADE; DROP SCHEMA IF EXISTS engine_meta CASCADE; DROP SCHEMA IF EXISTS lde CASCADE');
+  await pool.query('DROP SCHEMA IF EXISTS lde_competition CASCADE; DROP SCHEMA IF EXISTS lde_storage CASCADE; DROP SCHEMA IF EXISTS lde_security CASCADE; DROP SCHEMA IF EXISTS lde_auth CASCADE; DROP SCHEMA IF EXISTS engine_meta CASCADE; DROP SCHEMA IF EXISTS lde CASCADE');
   const entries = await loadMigrations();
   await t.test('fresh migration applies and schema is compatible', async () => {
     assert.equal(await applyMigrations(pool, entries), entries.length);
@@ -44,5 +45,6 @@ test('real PostgreSQL migrations and domain persistence', async (t) => {
   await t.test('domain contracts and transactional history', async (nested) => runDomainCases(nested, pool));
   await t.test('identity provider, MFA and authorization', async (nested) => runIdentityCases(nested, pool, connection));
   await t.test('protected objects and real HTTP access', (t) => runStorageCases(t, pool, connection));
+  await t.test('E07 real database and HTTP competition contracts', (nested) => runCompetitionCases(nested, pool, connection));
   await t.test('structural boundary regressions', async (nested) => runBoundaryCases(nested, pool));
 });

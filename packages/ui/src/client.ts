@@ -10,7 +10,7 @@ export async function request(path: string, body?: Record<string, unknown>): Pro
     });
     const data: unknown = await response.json().catch(() => null);
     if (!response.ok) {
-      const message = response.status === 401 ? 'Your credentials could not be verified. Sign in again or check your code.' : response.status === 403 ? 'Access is not available. Verify your email or complete a fresh authenticator challenge.' : response.status === 429 ? 'Too many attempts. Please wait before trying again.' : response.status >= 500 ? 'The service is temporarily unavailable. Please try again.' : 'The request was not accepted. Check the values and try again.';
+      const message = response.status === 401 ? 'Your credentials could not be verified. Sign in again or check your code.' : response.status === 403 ? 'Access is not available. Verify your email or complete a fresh authenticator challenge.' : response.status === 409 ? 'The material version changed or requires an amendment. Refresh, review the current terms and submit a new revision; your previous acceptance does not carry forward.' : response.status === 404 ? 'This resource is not available to your current account or assignment.' : response.status === 429 ? 'Too many attempts. Please wait before trying again.' : response.status >= 500 ? 'The service is temporarily unavailable. Please try again.' : 'The request was not accepted. Check the values and try again.';
       throw new RequestError(message, response.status);
     }
     if (!isRecord(data)) throw new RequestError('The service returned an unexpected response.', 502);

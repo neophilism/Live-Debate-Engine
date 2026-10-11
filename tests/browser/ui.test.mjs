@@ -1,4 +1,7 @@
 import test from 'node:test';
+import { runCompetitionBrowserCases } from './competition-cases.mjs';
+import { CompetitionStore } from '../../dist/packages/competition/src/store.js';
+import { createCompetitionHttp } from '../../dist/packages/competition/src/http.js';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { randomBytes, randomUUID } from 'node:crypto';
@@ -26,7 +29,7 @@ async function audit(page) {
   assert.deepEqual(result.violations.map(({ id, nodes }) => ({ id, targets: nodes.map((node) => node.target) })), []);
 }
 
-test('E06 actual browser, identity, SQL and two-brand journeys', { timeout: 180000 }, async (t) => {
+test('Actual browser, identity, SQL and two-brand competition journeys', { timeout: 300000 }, async (t) => {
   const admin = new pg.Pool(databaseConfig(connection, { NODE_ENV: 'test', LDE_ALLOW_INSECURE_LOCAL_DB: '1' }));
   const pools = []; const servers = []; let browser;
   const roles = ['lde_ui_identity', 'lde_ui_runtime'];
@@ -37,9 +40,10 @@ test('E06 actual browser, identity, SQL and two-brand journeys', { timeout: 1800
     for (const role of roles) await admin.query(`DROP ROLE IF EXISTS ${role}`);
     await admin.end();
   });
-  await admin.query('DROP SCHEMA IF EXISTS lde_storage CASCADE; DROP SCHEMA IF EXISTS lde_security CASCADE; DROP SCHEMA IF EXISTS lde_auth CASCADE; DROP SCHEMA IF EXISTS engine_meta CASCADE; DROP SCHEMA IF EXISTS lde CASCADE');
+  await admin.query('DROP SCHEMA IF EXISTS lde_competition CASCADE; DROP SCHEMA IF EXISTS lde_storage CASCADE; DROP SCHEMA IF EXISTS lde_security CASCADE; DROP SCHEMA IF EXISTS lde_auth CASCADE; DROP SCHEMA IF EXISTS engine_meta CASCADE; DROP SCHEMA IF EXISTS lde CASCADE');
   await applyMigrations(admin, await loadMigrations());
   for (const [index, role] of roles.entries()) {
+    await admin.query(`DROP ROLE IF EXISTS ${role}`);
     await admin.query(`CREATE ROLE ${role} LOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS`);
     await admin.query(`GRANT ${index === 0 ? 'lde_identity' : 'lde_runtime'} TO ${role}`);
     const url = new URL(connection); url.username = role;
@@ -47,13 +51,14 @@ test('E06 actual browser, identity, SQL and two-brand journeys', { timeout: 1800
     pools.push(new pg.Pool({ ...databaseConfig(url.toString(), { NODE_ENV: 'test', LDE_ALLOW_INSECURE_LOCAL_DB: '1' }), max: index === 0 ? 5 : 1 }));
   }
   async function serve(brand) {
-    let runtime; const mail = [];
+    let runtime; let competition; const mail = []; const store = new CompetitionStore(pools[1]);
     const ui = await createUiRuntime(brand, true);
-    const api = createApi({ ui, readiness: async () => ({ ready: true, reason: 'schema_compatible' }), identity: { handle: async (...args) => runtime.handle(...args) } });
+    const api = createApi({ ui, readiness: async () => ({ ready: true, reason: 'schema_compatible' }), identity: { handle: async (...args) => runtime.handle(...args) }, competition: { handle: (...args) => competition.handle(...args) } });
     api.listen(0, '127.0.0.1'); await once(api, 'listening');
     const origin = `http://127.0.0.1:${api.address().port}`;
     runtime = await createIdentityRuntime({ pool: pools[0], runtimePool: pools[1], config: { origin, secret: randomBytes(48).toString('base64url'), environment: 'test' }, sendMail: async (message) => { mail.push(message); } });
-    const server = { api, runtime, origin, mail }; servers.push(server); return server;
+    competition = createCompetitionHttp(store, runtime, origin, () => {});
+    const server = { api, runtime, origin, mail, store }; servers.push(server); return server;
   }
   const harbor = await serve('harbor'); const cedar = await serve('cedar');
   browser = await chromium.launch({ headless: true });
@@ -171,4 +176,5 @@ test('E06 actual browser, identity, SQL and two-brand journeys', { timeout: 1800
     await page.setViewportSize({ width: 360, height: 800 }); await page.goto(`${cedar.origin}/security`); await expect(page.getByRole('heading', { level: 1 })).toHaveText('Account security'); await audit(page);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)); assert.deepEqual(errors, []);
   });
+  await t.test('E07 actual material contract journeys', (nested) => runCompetitionBrowserCases(nested, { admin, appPool: pools[1], browser, harbor, cedar, audit }));
 });

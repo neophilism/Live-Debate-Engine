@@ -1,4 +1,5 @@
-import { array, boolean, code, digest, enumeration, identifier, integer, literal, nullable, object, refine, text, timestamp, type Parsed, type Parser } from './validation.js';
+import { array, boolean, code, dataObject, digest, enumeration, identifier, integer, literal, nullable, object, refine, text, timestamp, type Parsed, type Parser } from './validation.js';
+import { MATERIAL_TIME_ZONES } from './timezones.js';
 import { moneyParser } from './money.js';
 
 export const TENANT_KINDS = Object.freeze(['tenant', 'series', 'motion', 'participant', 'team', 'ruleset', 'tournament'] as const);
@@ -36,13 +37,7 @@ const timeZone = refine(text(1, 100), (zone) => {
   try { new Intl.DateTimeFormat('en-US', { timeZone: zone }); return true; } catch { return false; }
 }, 'Unsupported time zone');
 
-export const dataParsers = Object.freeze({
-  tenant: object({ name: text(), slug: code }),
-  series: object({ name: text() }),
-  motion: object({ text: text(1, 20000) }),
-  participant: object({ publicProfileObjectId: identifier('protected-object') }),
-  team: object({ name: text(), members: referenceList('participant', 1, 8) }),
-  ruleset: object({
+const legacyRulesetFields = {
     name: text(), rubric,
     timing: object({ openingPerSideSeconds: integer(1, 7200), discussionSeconds: integer(1, 14400), questionsSeconds: integer(1, 14400), closingPerSideSeconds: integer(1, 7200) }),
     electorate: object({ cohort: literal('paired-valid'), denominator: literal('all-valid-including-undecided'), channels: enumeration(['separate', 'combined'] as const), interimDisclosure: literal(false) }),
@@ -50,10 +45,57 @@ export const dataParsers = Object.freeze({
     standardPrize: object({ audienceShareBps: literal(5000), judgesShareBps: literal(5000), tiePolicy: enumeration(['split-share', 'review'] as const) }),
     advancement: object({ primary: literal('audience'), audienceTie: enumeration(['judges', 'review', 'rematch'] as const) }),
     deadlines: object({ aiReviewHours: integer(1, 8760), outcomeDisputeHours: integer(1, 8760), paymentTargetDays: integer(1, 3650), paymentDeadlineDays: integer(1, 3650) }),
-  }),
+};
+
+const legacyRuleset = object(legacyRulesetFields);
+export const materialRuleset = refine(object({
+  ...legacyRulesetFields, materialVersion: literal(2), profile: literal('motion-debate-v1'),
+  voting: object({ preWindowSeconds: integer(30, 3600), postWindowSeconds: integer(30, 3600), remoteDelaySeconds: integer(0, 600), lateArrival: literal('spectator-only'), missingPost: literal('exclude-unpaired'), choices: refine(array(enumeration(['for', 'against', 'undecided'] as const), 3, 3), (v) => v.join(',') === 'for,against,undecided', 'All three ballot choices are required') }),
+  conduct: object({ graceSeconds: integer(0, 300), noNewClosingArguments: literal(true), noOutsideCoaching: literal(true) }),
+  adjustments: object({ penaltyMaxPerFinding: integer(0, 10), penaltyTotalCap: integer(0, 100), bonusMaxPerFinding: integer(0, 10), bonusTotalCap: integer(0, 100), evidenceRequired: literal(true), noDoubleCounting: literal(true) }),
+  judgesPrizeAllocation: enumeration(['winner-take-all', 'proportional'] as const), judgeWeighting: literal('equal'),
+  teamPrizeSplit: enumeration(['equal', 'unanimous-custom'] as const), judgesTie: enumeration(['split-share', 'review'] as const),
+  inconclusive: literal('hold-for-review'), allSeatsRequired: literal(true), competitorEntryFeeMinorUnits: literal('0'),
+  amendmentReason: nullable(text(10, 1000)),
+}), (v) => v.deadlines.paymentTargetDays <= v.deadlines.paymentDeadlineDays
+  && v.adjustments.penaltyTotalCap >= v.adjustments.penaltyMaxPerFinding
+  && v.adjustments.bonusTotalCap >= v.adjustments.bonusMaxPerFinding
+  && ((v.adjustments.penaltyMaxPerFinding === 0) === (v.adjustments.penaltyTotalCap === 0))
+  && ((v.adjustments.bonusMaxPerFinding === 0) === (v.adjustments.bonusTotalCap === 0)), 'Inconsistent material rules, adjustment caps or payment deadlines');
+export type MaterialRuleset = Parsed<typeof materialRuleset>;
+
+const legacyContractFields = { motionRef: reference('motion'), rulesetRef: reference('ruleset'), forTeamRef: reference('team'), againstTeamRef: reference('team'), prizeBudget: moneyParser, startsAt: timestamp, timeZone, publication: enumeration(['live', 'embargoed'] as const), embargoUntil: nullable(timestamp) };
+
+const legacyContractShape = object(legacyContractFields);
+const validContract = (value: Parsed<typeof legacyContractShape>) => value.forTeamRef.entityId !== value.againstTeamRef.entityId && (value.publication === 'embargoed' ? value.embargoUntil !== null && value.embargoUntil >= value.startsAt : value.embargoUntil === null);
+const legacyContract = refine(object(legacyContractFields), validContract, 'Invalid opposing teams or embargo policy');
+export const materialContract = refine(object({
+  ...legacyContractFields, timeZone: enumeration(MATERIAL_TIME_ZONES), materialVersion: literal(2), eventRef: reference('event'),
+  speakers: array(object({ assignmentRef: reference('assignment'), participantRef: reference('participant'), side,
+    order: integer(1, 8), openingSeconds: integer(0, 7200), closingSeconds: integer(0, 7200), prizeShareBps: nullable(integer(1, 10000)) }), 2, 16),
+  acknowledgmentDeadline: timestamp, amendmentReason: nullable(text(10, 1000)),
+}), (v) => validContract(v) && v.acknowledgmentDeadline < v.startsAt
+  && new Set(v.speakers.map((r) => r.assignmentRef.entityId)).size === v.speakers.length
+  && new Set(v.speakers.map((r) => r.participantRef.entityId)).size === v.speakers.length
+  && ['for', 'against'].every((side) => {
+    const rows = v.speakers.filter((r) => r.side === side);
+    return rows.length >= 1 && rows.length <= 8 && rows.map((r) => r.order).sort((a,b) => a-b).every((order,index) => order === index + 1);
+  }), 'Invalid contract deadline, embargo, opposing teams or speaker allocation');
+export type MaterialContract = Parsed<typeof materialContract>;
+function materialOrLegacy<A,B>(legacy: Parser<A>, material: Parser<B>): Parser<A | B> {
+  return (input) => Object.hasOwn(dataObject(input), 'materialVersion') ? material(input) : legacy(input);
+}
+
+export const dataParsers = Object.freeze({
+  tenant: object({ name: text(), slug: code }),
+  series: object({ name: text() }),
+  motion: object({ text: text(1, 20000) }),
+  participant: object({ publicProfileObjectId: identifier('protected-object') }),
+  team: object({ name: text(), members: referenceList('participant', 1, 8) }),
+  ruleset: materialOrLegacy(legacyRuleset, materialRuleset),
   event: object({ title: text(), seriesRef: nullable(reference('series')), motionRef: reference('motion'), rulesetRef: reference('ruleset'), format: enumeration(['standalone', 'tournament'] as const), mode: enumeration(['in-person', 'remote', 'hybrid'] as const) }),
   assignment: refine(object({ principalId: identifier('principal'), role: enumeration(ROLES), teamRef: nullable(reference('team')) }), (value) => value.role === 'debater' ? value.teamRef !== null : value.teamRef === null, 'Only a debater assignment has a team'),
-  contract: refine(object({ motionRef: reference('motion'), rulesetRef: reference('ruleset'), forTeamRef: reference('team'), againstTeamRef: reference('team'), prizeBudget: moneyParser, startsAt: timestamp, timeZone, publication: enumeration(['live', 'embargoed'] as const), embargoUntil: nullable(timestamp) }), (value) => value.forTeamRef.entityId !== value.againstTeamRef.entityId && (value.publication === 'embargoed' ? value.embargoUntil !== null && value.embargoUntil >= value.startsAt : value.embargoUntil === null), 'Invalid opposing teams or embargo policy'),
+  contract: materialOrLegacy(legacyContract, materialContract),
   session: object({ contractRef: reference('contract'), phase: enumeration(PHASES) }),
   poll: refine(object({ motionRef: reference('motion'), round: enumeration(['pre', 'post'] as const), state: enumeration(['scheduled', 'open', 'closed'] as const), opensAt: timestamp, closesAt: timestamp }), (value) => value.closesAt > value.opensAt, 'Poll window must have positive duration'),
   ballot: object({ basis: literal('sealed-ballot'), pollRef: reference('poll'), voterPseudonymDigest: digest, encryptedObjectId: identifier('protected-object') }),

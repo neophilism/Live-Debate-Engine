@@ -1,3 +1,5 @@
+import { CompetitionStore } from '../../../packages/competition/src/store.js';
+import { createCompetitionHttp } from '../../../packages/competition/src/http.js';
 import { createUiRuntime } from '../../../packages/ui/src/http.js';
 import { FileKeyProvider } from '../../../packages/security/src/keys.js';
 import { ProtectedObjectStore } from '../../../packages/security/src/store.js';
@@ -38,7 +40,9 @@ try {
   const objects = keys && pool && identity ? createObjectHttp(new ProtectedObjectStore(pool, keys), identity, env.LDE_IDENTITY_ORIGIN ?? '') : null;
   if (env.LDE_UI_ENABLED && !['0', '1'].includes(env.LDE_UI_ENABLED)) throw new Error('Invalid UI flag');
   const ui = env.LDE_UI_ENABLED === '0' ? null : await createUiRuntime(env.LDE_UI_BRAND ?? 'harbor', !!identity);
+  const competition = pool && identity ? createCompetitionHttp(new CompetitionStore(pool), identity, env.LDE_IDENTITY_ORIGIN ?? '') : null;
   const api = createApi({
+    ...(competition ? { competition } : {}),
     ...(ui ? { ui } : {}),
     ...(objects ? { objects } : {}),
     ...(identity ? { identity } : {}),

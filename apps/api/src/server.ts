@@ -1,15 +1,17 @@
+import type { CompetitionHttpRuntime } from '../../../packages/competition/src/http.js';
 import type { UiRuntime } from '../../../packages/ui/src/http.js';
 import { createServer, type Server } from 'node:http';
 import type { ObjectHttpRuntime } from '../../../packages/security/src/http.js';
 import type { IdentityRuntime } from '../../../packages/identity/src/http.js';
 import { ENGINE_VERSION, type HealthResponse, type Readiness } from '../../../packages/contracts/src/index.js';
 
-export type ApiOptions = Readonly<{ readiness: () => Promise<Readiness>; release?: string; identity?: IdentityRuntime; objects?: ObjectHttpRuntime; ui?: UiRuntime }>;
+export type ApiOptions = Readonly<{ readiness: () => Promise<Readiness>; release?: string; identity?: IdentityRuntime; objects?: ObjectHttpRuntime; ui?: UiRuntime; competition?: CompetitionHttpRuntime }>;
 
 export function createApi(options: ApiOptions): Server {
   const release = options.release && /^[a-f0-9]{40}$/.test(options.release) ? options.release : null;
   const health: HealthResponse = Object.freeze({ status: 'alive', product: 'Live Debate Engine', version: ENGINE_VERSION, release, stage: 'foundation', competitionReady: false });
   const server = createServer(async (request, response) => {
+    if (options.competition && await options.competition.handle(request, response)) return;
     if (options.objects && await options.objects.handle(request, response)) return;
     if (options.identity && await options.identity.handle(request, response)) return;
     if (options.ui?.handle(request, response)) return;

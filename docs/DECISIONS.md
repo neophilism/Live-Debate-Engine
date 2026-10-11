@@ -24,3 +24,15 @@ Architecture baseline: TypeScript domain/application modules and shared React UI
 Security baseline: apply the user's End-To-End-Everywhere Security Architecture Standard; document trust boundaries, appropriate encryption, key custody, least privilege and evidence. Media readable by an authorized recorder/transcriber is not private from that processing endpoint.
 
 Legal templates in the source contain placeholders and jurisdiction-dependent provisions. This repository specifies acceptance/versioning and review workflows; it does not approve or restate those provisions as binding legal advice.
+
+## E07 explicit draft-profile choices
+
+D15: The initial editable profile selects 25 minutes of discussion, 20 minutes of Q&A, 120-second polls, a 10-second grace interval, three equally weighted human judges, 0-10 criterion bounds, two-point per-finding penalties/bonuses with total caps of 10/4, evidence requirements and no double counting. These are engineering starting values within or alongside source examples, not claims that the source mandates every number. Organizers must review the complete frozen version. Ordinary prize shares remain 50/50; a budget here proves neither funding nor legal payment eligibility. Calculation, currency-provider restrictions and exact ledger allocation remain E22/E25/E27 gates and cannot be activated by material acknowledgment.
+
+D16: UTC instants are entered explicitly; the selected display zone never silently changes them. V2 uses the committed canonical zone vocabulary in packages/contracts/src/timezones.ts, shared with SQL validation. Arbitrary aliases are not accepted. Legacy v1 records retain their previous parser, rather than rewriting historical bytes. The database must use UTF8 encoding.
+
+D17: Saving, publishing a ruleset, offering a contract, individual acknowledgment and historical acceptance are distinct. The roster includes every exact participant snapshot, with one current owner-bound assignment per person. Opening/closing totals are per side, not per speaker. Equal team shares carry no invented percentages; custom shares must total 10,000 basis points per side and be acknowledged by every individual.
+
+D18: Changes to event, motion, team, participant or assignment references, and changes to a signer's identity/membership/grant/ownership basis, permanently invalidate affected contract revisions. Restoring a role does not revive old readiness. A newly recorded amendment and fresh personal acknowledgments are required. Ruleset publication creates a new version but does not silently replace an event's exact published rules reference.
+
+D19: E07 readiness is only material-terms readiness. Account registration, audience/event admission, legal releases, eligibility, staffing, scoring, media rights, funding, payments, independent oversight and any actual competition require their own later gates. registrationOpen and competitionReady remain false. Test identities and operator fixtures are not a replacement runtime casting or event-administration API.

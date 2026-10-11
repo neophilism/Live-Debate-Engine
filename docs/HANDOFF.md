@@ -1,6 +1,6 @@
 # Self-contained handoff
 
-Start with README.md, DEVELOPMENT_PLAN.md, REQUIREMENTS.md, DECISIONS.md, ARCHITECTURE.md, RESOURCES.md, CLOUD_ACCESS.md, DEVELOPMENT.md, DATABASE_SECURITY.md, DOMAIN_CONTRACTS.md, E03_EVIDENCE.md, E04_IDENTITY.md, E05_PROTECTED_STORAGE.md, E06_UI.md, SECURITY.md and ../repo-development-progress.md. Live Debate Engine owns reusable competition logic and UI. Finish the engine before beginning UBC Debates; leave that repository and the unrelated politician-debate product untouched.
+Start with README.md, DEVELOPMENT_PLAN.md, REQUIREMENTS.md, DECISIONS.md, ARCHITECTURE.md, RESOURCES.md, CLOUD_ACCESS.md, DEVELOPMENT.md, DATABASE_SECURITY.md, DOMAIN_CONTRACTS.md, E03_EVIDENCE.md, E04_IDENTITY.md, E05_PROTECTED_STORAGE.md, E06_UI.md, E07_MATERIAL_CONTRACTS.md, E07_SECURITY_REVIEW.md, SECURITY.md and ../repo-development-progress.md. Live Debate Engine owns reusable competition logic and UI. Finish the engine before beginning UBC Debates; leave that repository and the unrelated politician-debate product untouched.
 
 ## Verified predecessors
 
@@ -12,13 +12,17 @@ E05 maps only to PR6, not auxiliary roadmap PR5 or closed duplicate PR7. Head367
 
 Starting E06 main86d3601c264d5c9256f6a8483784ef0a27c827f4 (including auxiliary Engine Room registry updates) passed38161332759. Exact source artifact matched tree01ef40bedca65bc986944748e354e6db902eefd5.
 
-## E06 candidate, PR9
+## E06 accepted, PR9
 
-Branch feat/e06-reusable-ui adds shared React components, two neutral brands, actual identity/account-security UI, current-user workspace discovery and real browser accessibility/keyboard tests. No client-selected role or brand grants access. The SQL function has no asserted-principal parameter and checks current credential-derived grants. Static paths are allowlisted; browser bundle excludes identity/database/key modules. No secret is intentionally put in web storage or screenshots.
+E06 merged at 821eef2c6b0f8f5c543e27bcefba74674232d66e. Reviewed head a3f6004111ea0a2596c6d7497bfeee1acb927977 passed CI38167743764; merged-main CI38167862854 passed; separate self-review5484609304. Shared React, real account/MFA/session interfaces, current-user workspaces and both neutral-brand browser journeys are implemented.
 
-Local strict compilation/lint/build/plan/migration checks passed: 133 unit/API/contract cases, 46 PostgreSQL 18 cases and 11 browser records (parent plus ten scenarios). Non-secret screenshots were visually reviewed. Final head CI, review, merge and merged-main must be read from actual PR9 before proceeding; local checks are not a merge claim. The temporary toolchain preparation workflow is removed from the final candidate. See E06_UI.md for implementation, artifact provenance and limitations.
+## E07 candidate, PR10
 
-Next dependency-ready step after verified E06 acceptance is E07: versioned ruleset editing/validation and frozen competition contracts with explicit amendments/acknowledgments. Do not expose the internal generic snapshot writer as an unrestricted API. Keep audience verdict, judges verdict, advancement and obligations separate. No live competition, actual prize funding or AI qualification exists yet.
+The original head1a1bfde5223e0ded451a1400b42e5ea6abbfc052 contained only a five-line document. Its passing run38169696928 did not accept E07. The previously reported local implementation was not recoverable from the accessible source artifact; this continuation reconstructed and tested the actual feature. Do not carry forward the old 140/58/16 test claims as evidence for this source.
+
+The full candidate adds materialVersion2 rules/contracts without rewriting v1, narrow credential-bound SQL/API operations, publication/offer separation, exact allocations, personal acknowledgments, immutable amendments/history, permanent changed-basis invalidation and reusable organizer/participant React pages. Local checks passed 141 unit/API records, 64 real PostgreSQL18 records and 21 browser records (19 real scenarios plus two parent records). The authoritative final exact-head CI/review/merge/main evidence must be read from PR10; this source does not predeclare a future merge. Read E07_MATERIAL_CONTRACTS.md and E07_SECURITY_REVIEW.md.
+
+Next: after all E07 gates and merged-main CI pass, execute E08 series, motions and event administration, then E09 casting/rosters in dependency order. E07 tests seed prerequisites through explicitly operator-only fixtures because those runtime workflows are later steps; never expose the generic snapshot writer. All new effects must preserve material-basis invalidation. Registration and competition remain closed; no actual funds or official AI modes are authorized.
 
 ## Environment and cloud
 

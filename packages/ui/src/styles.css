@@ -94,3 +94,17 @@ footer { padding: 28px 42px; color: #526364; font-size: 12px; border-top: 1px so
 @media (max-width: 720px) { .app-shell { display: block; } .sidebar { min-height: 0; padding: 20px; gap: 18px; } .nav-label, .sidebar-note { display: none; } nav { display: flex; flex-wrap: wrap; gap: 6px; } nav a { font-size: 12px; padding: 8px 12px; min-height: 44px; } .topbar { padding: 14px 20px; min-height: 60px; flex-wrap: wrap; } main { padding: 30px 20px; } .two-column { grid-template-columns: 1fr; gap: 0; } .hero, .panel { padding: 22px; } footer { padding: 24px 20px; } .page-title { margin-bottom: 24px; } th, td { padding: 12px; } .recovery-codes { columns: 1; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto; animation: none; transition: none; } }
 @media (forced-colors: active) { .badge, .timer, .notice, .button, nav a[aria-current] { border: 2px solid CanvasText; } }
+
+select, textarea { font: inherit; width: 100%; min-height: 46px; border: 1px solid #81948e; border-radius: 6px; padding: 10px 12px; background: #fff; color: #183033; }
+textarea { resize: vertical; }
+.material-group { border: 1px solid #cad6cf; border-radius: 6px; padding: 18px; margin: 20px 0; }
+.material-group legend { font-weight: 600; padding: 0 8px; }
+.material-group p, .material-value, .material-identity { overflow-wrap: anywhere; word-break: normal; }
+.material-definition { margin: 12px 0; padding: 0; }
+.material-definition > div { padding: 10px 0; border-top: 1px solid #d7dfda; }
+.material-definition dt { font-weight: 600; font-size: 13px; }
+.material-definition dd { margin: 5px 0 0 14px; font-size: 13px; overflow-wrap: anywhere; }
+.material-list { padding-left: 24px; }
+.material-list > li { padding: 8px 0; }
+summary { cursor: pointer; min-height: 44px; padding: 12px 0; font-weight: 600; }
+.motion-text { white-space: pre-wrap; overflow-wrap: anywhere; }

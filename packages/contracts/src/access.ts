@@ -10,7 +10,7 @@ export const ACTIONS = Object.freeze([
   'media.control', 'question.submit', 'question.moderate', 'ballot.cast-own',
   'scorecard.read-own', 'scorecard.write-own', 'result.verify', 'result.publish',
   'prize.manage', 'payout.approve', 'dispute.review', 'ballot.read-sealed',
-  'tally.write', 'transcript.append', 'payout.execute', 'object.scan',
+  'tally.write', 'transcript.append', 'payout.execute', 'object.scan', 'ruleset.manage', 'contract.manage', 'contract.acknowledge',
 ] as const);
 export type Action = typeof ACTIONS[number];
 export type Role = typeof ROLES[number];
@@ -69,6 +69,9 @@ function rule(scope: Rule['scope'], roles: readonly Role[], services: readonly S
   return Object.freeze({ scope, roles: Object.freeze([...roles]), services: Object.freeze([...services]), ownership, sensitive });
 }
 const rules: Readonly<Record<Action, Rule>> = Object.freeze({
+  'ruleset.manage': rule('tenant', ['organizer'], [], false, true),
+  'contract.manage': rule('event', ['organizer'], [], false, true),
+  'contract.acknowledge': rule('event', ['debater'], [], true),
   'tenant.manage': rule('tenant', ['organizer'], [], false, true),
   'event.read': rule('event', ROLES),
   'event.manage': rule('event', ['organizer', 'producer']),

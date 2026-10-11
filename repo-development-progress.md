@@ -1,13 +1,13 @@
 # Development progress
 
-Approved: 50 engine steps and 4 separate UBC steps. Counts are not effort or production-readiness percentages.
+Approved: 50 engine steps and 4 separate UBC steps. Counts are not effort or production-readiness percentages. Mapping a draft PR does not count it as completed.
 
 | Step | Actual PR | Observed evidence |
 |---|---|---|
 | E01 | #1 | Merged ddff3302b5ee3de0057fab1c459c4df7f607c923; exact-head CI 38125095302 and main CI 38125139802 passed |
 | E02 | #2 | Merged e29a302fdeb348b0f2185ee181c83203a85e05e5; exact-head CI 38126067565 and main CI 38126144646 passed; separate security self-review 5482622645 |
 | E03 | #3 | Merged 01c90b1dc016667572c08f23190f66cadb0b028d; all five jobs passed on exact-head CI 38127969980 and main CI 38128158515; separate security self-review 5482733931 |
-| E04 | Pending actual PR mapping | In development: deny-by-default policy evaluator and tests. Provider/MFA integration, persisted session/role controls, RLS and authenticated API gates remain; not complete. |
+| E04 | #4 (draft) | In development: deny-by-default policy evaluator and tests. Provider/MFA integration, persisted session/role controls, RLS and authenticated API gates remain; not complete. Current exact-head check evidence belongs to the draft PR. |
 | E05-E50 | None | Not implemented |
 | U01-U04 | None | Not implemented; UBC remains separate and U01 waits for E47 |
 

@@ -1,25 +1,25 @@
 # Live Debate Engine
 
-A white-label operating platform for structured, motion-based debate competitions. **UBC Debates** is the separate thin branded implementation in `neophilism/UBC-Debates`. This is independent of the politician-to-politician Debate-Engine product.
+White-label operating software for structured, motion-based debate competitions. All reusable competition logic, services and interfaces belong here. UBC Debates is a later thin branded consumer, and the politician-to-politician Debate-Engine project is separate.
 
 ## Status
 
-The approved roadmap contains 50 engine steps and four later UBC steps. E01-E04 are merged with verified exact-head and merged-main CI. E05 protected storage is in development: encrypted private objects, quarantine, signed session-bound access, key lifecycle and auditing. See progress and actual PR records for acceptance, not just this snapshot.
+The owner approved 50 engine steps (E01-E50) and four separate UBC steps (U01-U04). E01-E05 are merged with verified head/main checks. E06 introduces the shared browser interface in PR #9; check [progress](repo-development-progress.md) and the actual PR for its acceptance state.
 
-This is not yet a live competition platform. The engine remains separate from the politician-debate product and owns all reusable competition functionality; UBC Debates is not being implemented in parallel.
+This is not ready to run live competitions. No production deployment, live ballot operation, available prize funding, security certification or AI qualification is claimed. UBC Debates remains untouched until its engine dependency is ready.
 
 ## Documentation
 
-[Approved plan](docs/DEVELOPMENT_PLAN.md) | [Requirements](docs/REQUIREMENTS.md) | [Decisions](docs/DECISIONS.md) | [Architecture](docs/ARCHITECTURE.md) | [Resources](docs/RESOURCES.md) | [Cloud access](docs/CLOUD_ACCESS.md) | [Local development](docs/DEVELOPMENT.md) | [Domain contracts](docs/DOMAIN_CONTRACTS.md) | [E03 evidence](docs/E03_EVIDENCE.md) | [E04 work](docs/E04_IDENTITY.md) | [Protected storage](docs/E05_PROTECTED_STORAGE.md) | [Progress](repo-development-progress.md) | [Handoff](docs/HANDOFF.md) | [Security](SECURITY.md)
+[Approved plan](docs/DEVELOPMENT_PLAN.md) | [Requirements](docs/REQUIREMENTS.md) | [Decisions](docs/DECISIONS.md) | [Architecture](docs/ARCHITECTURE.md) | [Resources](docs/RESOURCES.md) | [Cloud access](docs/CLOUD_ACCESS.md) | [Development](docs/DEVELOPMENT.md) | [Identity](docs/E04_IDENTITY.md) | [Protected storage](docs/E05_PROTECTED_STORAGE.md) | [Browser interface](docs/E06_UI.md) | [Handoff](docs/HANDOFF.md) | [Security](SECURITY.md)
 
 ## Local development
 
-With the documented Node.js and Docker prerequisites:
+Use the documented Node.js and Docker prerequisites. Local setup creates private ignored configuration, not cloud resources.
 
 ```sh
 npm ci --ignore-scripts
 npm run setup:local
-docker compose --env-file .env.migrations up -d --wait
+docker compose up -d --wait
 npm run build
 npm run migrate
 npm run provision:local
@@ -27,12 +27,14 @@ npm run check
 npm run dev
 ```
 
-Local setup creates an ignored private configuration; it never accesses Render or Neon. `/api/health` is liveness and `/api/ready` checks schema compatibility. Neither establishes competition readiness. The configured identity API supports verified-email signup, login, MFA and revocation. No registration UI or competition-domain endpoint exists yet. Narrow read policies enforce identity, tenant/event scope and ownership; generic domain writes remain disabled.
+Read [development](docs/DEVELOPMENT.md) for the separate migration/identity/runtime roles, local email delivery and configuration. Open the local server to use the browser interface. `LDE_UI_BRAND=harbor` (default) or `cedar` selects one of two neutral reference brands. `LDE_UI_ENABLED=0` runs the API without the UI. The brand does not select an organization or grant permissions.
+
+The browser offers real registration, email verification, sign-in, authenticator/recovery flows, password reset/change, session management and assigned workspaces. Users without assignments see an empty workspace state, not fabricated events. Other competition controls arrive in their approved steps. `/api/health` is liveness and `/api/ready` checks schema compatibility; both retain competitionReady:false.
+
+`npm run test:browser` uses the real backend and Chromium against a disposable local database named lde_ci; see the UI documentation before running this destructive test harness. Production mail, HTTPS, ingress and deployment qualification remain separate gates.
 
 ## Invariants
 
-Audience persuasion verdict, judges' quality verdict, tournament advancement and prize obligations are separate records. No single blended popularity/quality score exists. Standard prizes have independent allocations; tournament placement awards use a separate budget.
+Audience persuasion verdict, judges' quality verdict, tournament advancement and prize obligations are distinct. Standard prizes have separate audience/judging allocations; tournament placement awards use a separate budget. Accepted event contracts freeze motion, electorate, timing, rubric and prizes; corrections preserve history. Interim distributions remain sealed. AI authority requires independent empirical qualification and oversight.
 
-Event contracts freeze motion, electorate, rules, rubric, timing, prizes and deadlines. Interim distributions stay sealed. Corrections preserve prior revisions. AI remains advisory until a specific configuration passes qualification and oversight. Type definitions and hashes alone do not establish those operational guarantees.
-
-Original source documents, participant information, tax forms, ballots and credentials must not be committed to this public repository. Approval to develop is not proof of prize funds, legal approval, deployment readiness or authorization for new costs.
+Never commit original private source documents, participant data, ballots, tax forms or credentials to this public repository. Development approval is not legal approval, proof of funds, deployment readiness or authorization for new costs.

@@ -1,3 +1,4 @@
+import { createUiRuntime } from '../../../packages/ui/src/http.js';
 import { FileKeyProvider } from '../../../packages/security/src/keys.js';
 import { ProtectedObjectStore } from '../../../packages/security/src/store.js';
 import { createObjectHttp } from '../../../packages/security/src/http.js';
@@ -35,7 +36,10 @@ try {
   const keys = env.LDE_STORAGE_KEY_FILE ? new FileKeyProvider(env.LDE_STORAGE_KEY_FILE) : null;
   if (keys) await keys.active('asset-ticket');
   const objects = keys && pool && identity ? createObjectHttp(new ProtectedObjectStore(pool, keys), identity, env.LDE_IDENTITY_ORIGIN ?? '') : null;
+  if (env.LDE_UI_ENABLED && !['0', '1'].includes(env.LDE_UI_ENABLED)) throw new Error('Invalid UI flag');
+  const ui = env.LDE_UI_ENABLED === '0' ? null : await createUiRuntime(env.LDE_UI_BRAND ?? 'harbor', !!identity);
   const api = createApi({
+    ...(ui ? { ui } : {}),
     ...(objects ? { objects } : {}),
     ...(identity ? { identity } : {}),
     ...(env.RENDER_GIT_COMMIT ? { release: env.RENDER_GIT_COMMIT } : {}),

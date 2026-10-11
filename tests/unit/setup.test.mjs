@@ -18,6 +18,7 @@ test('local setup creates private random configuration and never overwrites it',
   const migrationContent = await readFile(migrationFile, 'utf8');
   const password = migrationContent.match(/^LDE_LOCAL_DB_PASSWORD=([a-f0-9]{48})$/m)?.[1];
   assert.doesNotMatch(content, /DATABASE_URL_UNPOOLED|LDE_LOCAL_DB_PASSWORD/);
+  assert.match(content, /^LDE_UI_ENABLED=1$/m);
   assert.match(content, /LDE_IDENTITY_SECRET=[A-Za-z0-9_-]{64}/);
   assert.match(content, /LDE_IDENTITY_DATABASE_URL=postgresql:\/\/lde_auth_local:/);
   assert.match(content, /DATABASE_URL=postgresql:\/\/lde_app_local:/);

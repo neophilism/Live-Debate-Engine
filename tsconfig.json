@@ -19,13 +19,20 @@
     "skipLibCheck": false,
     "types": [
       "node"
+    ],
+    "jsx": "react-jsx",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
     ]
   },
   "include": [
     "apps/**/*.ts",
     "packages/**/*.ts",
     "scripts/**/*.ts",
-    "tests/typecheck/**/*.ts"
+    "tests/typecheck/**/*.ts",
+    "packages/**/*.tsx"
   ],
   "exclude": [
     "node_modules",

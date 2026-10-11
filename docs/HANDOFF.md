@@ -8,15 +8,17 @@ E01 PR #1 merged at ddff3302b5ee3de0057fab1c459c4df7f607c923; exact-head/main CI
 
 E03 PR #3 merged at 01c90b1dc016667572c08f23190f66cadb0b028d. Reviewed head 74466c3d825e1708dec9a098e2f9b3e905f0f6db passed CI 38127969980 and merged main passed CI 38128158515: Node 22/24, PostgreSQL 17/18 and secret scanning. Separate self-review 5482733931; normal expected-head merge. See E03_EVIDENCE.md.
 
-## Verified E04 and E05 in development
+## Verified E04 and E05
 
 E04 PR #4 merged at fc40637f2c0af08e7b31e43b1570207922b0e1b7. Reviewed head 8ab385a8d26809a87c6f05a9cb9b6845c9de2753 passed CI 38151000137; merged-main CI 38151234814 also passed all five jobs. Separate security self-review 5483835591. The real Better Auth provider, session-bound MFA/recovery/revocation and credential-bound database authorization are implemented; prior draft-only wording is superseded.
 
-E05 now adds real encrypted PostgreSQL object storage, separate-purpose envelope keys, private-file key lifecycle, quarantine and the bounded local ClamAV protocol adapter, session-bound 60-second asset tickets, actual HTTP access, durable audit and log allowlists. See E05_PROTECTED_STORAGE.md for boundaries, operator commands, resource limits and release gates. Local aggregate checks passed 128 unit/API/contract cases and 46 real PostgreSQL 18 cases; exact-head CI/review/merge are not claimed until observed. Generic competition writes and ballot upload remain disabled.
+E05 PR #6 merged at 1751389581fa0e305b92967d2646fa7ed9f92977; exact-head CI 38160338358 and main CI 38160444377 passed all five jobs; separate self-review 5484260096. It implements bounded encrypted objects, purpose-separated keys, quarantine, scanner protocol, signed session-bound downloads and immutable audits. See E05_PROTECTED_STORAGE.md. The real scanner/cloud/media/retention gates remain explicit. Auxiliary roadmap PR #5 is preserved and duplicate PR #7 closed without counting extra work.
 
-The application and keyfile/scanner are authorized plaintext processors, not end-to-end secrecy from those endpoints. Reference objects are limited to 1 MiB; full recordings require E17's media/storage adapter. No live ClamAV daemon or cloud keys were provisioned; protocol-fixture tests do not establish real malware-detection qualification. All uploaded files remain quarantined until explicit clean processing under an event-scoped scanner credential. E06 remains gated on E05 acceptance.
+## E06 in development
 
-The local environment was restored from E04 main source artifact and authenticated dependency/PostgreSQL artifacts. Dependency restoration differed only in TypeScript; installed TypeScript was restored to the actual committed 5.8.3 baseline before running tests. The local tree before edits matched main tree f476102638ee9495c7e2f728d0b7c97650ad427b. No modified lockfile or weakened compiler gate was introduced.
+PR #8 adds the engine-owned React interface, accessible primitives and actual account/security/workspace/file workflows. Two neutral profiles use the same bundle; UBC remains untouched. New metadata lists preserve RLS and per-file purpose/owner boundaries. UI permissions do not replace backend authorization. Static assets and public brand selection are strictly bounded.
+
+The candidate dependencies were obtained from read-only CI run 38160673069 and reviewed against the committed baseline: no existing version changed. New dependencies are pinned; TypeScript remains 5.8.3. Local 134 unit/API/contract tests and 46 real PostgreSQL cases pass. Local Chromium cannot navigate due to environment policy; leave it intact and use the actual hosted browser CI job. Browser/axe/keyboard checks and screenshot review must pass before E06 can merge. The temporary dependency workflow is absent from the final tree. No incomplete gate may be inferred from the local unit checks.
 
 ## Environment and cloud
 

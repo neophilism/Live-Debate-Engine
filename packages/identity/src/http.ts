@@ -55,7 +55,7 @@ function send(response: ServerResponse, status: number, value: unknown, cookies?
 
 export type IdentityRuntime = Readonly<{
   provider: IdentityProvider;
-  authenticate: (request: IncomingMessage) => Promise<{ token: string; actor: Actor }>;
+  authenticate: (request: IncomingMessage) => Promise<{ token: string; actor: Actor; twoFactorEnabled: boolean }>;
   drain: () => Promise<void>;
   handle: (request: IncomingMessage, response: ServerResponse) => Promise<boolean>;
 }>;
@@ -68,12 +68,12 @@ export async function createIdentityRuntime(options: IdentityOptions & Readonly<
     const tracked = task.then(() => {}, () => { console.error(JSON.stringify({ event: 'identity_background_delivery_failed' })); });
     tasks.add(tracked); void tracked.finally(() => tasks.delete(tracked));
   } });
-  async function current(request: IncomingMessage): Promise<{ token: string; actor: Actor }> {
+  async function current(request: IncomingMessage): Promise<{ token: string; actor: Actor; twoFactorEnabled: boolean }> {
     const session = await provider.api.getSession({ headers: transportHeaders(request), query: { disableCookieCache: true } });
     if (!session) throw new AccessError(401);
     const actor = await withCredential(options.runtimePool, session.session.token, async (_client, value) => value);
     if (actor.kind !== 'human') throw new AccessError(403);
-    return { token: session.session.token, actor };
+    return { token: session.session.token, actor, twoFactorEnabled: 'twoFactorEnabled' in session.user && session.user.twoFactorEnabled === true };
   }
   async function handle(request: IncomingMessage, response: ServerResponse): Promise<boolean> {
     let url: URL;
@@ -116,7 +116,7 @@ export async function createIdentityRuntime(options: IdentityOptions & Readonly<
       const signedIn = await current(request);
       if (url.pathname === '/api/session') {
         if (method !== 'GET') throw new HttpError(405, 'method_not_allowed');
-        send(response, 200, { principalId: signedIn.actor.principalId, sessionId: signedIn.actor.sessionId, assurance: signedIn.actor.mfaVerifiedAt ? 'mfa' : 'single-factor', mfaVerifiedAt: signedIn.actor.mfaVerifiedAt });
+        send(response, 200, { principalId: signedIn.actor.principalId, sessionId: signedIn.actor.sessionId, assurance: signedIn.actor.mfaVerifiedAt ? 'mfa' : 'single-factor', mfaVerifiedAt: signedIn.actor.mfaVerifiedAt, twoFactorEnabled: signedIn.twoFactorEnabled });
       } else if (url.pathname === '/api/sessions') {
         if (method !== 'GET') throw new HttpError(405, 'method_not_allowed');
         const sessions = await provider.api.listSessions({ headers: transportHeaders(request) });

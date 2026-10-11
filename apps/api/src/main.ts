@@ -1,3 +1,5 @@
+import { resolve } from 'node:path';
+import { createUiRuntime } from '../../../packages/ui/server/http.js';
 import { FileKeyProvider } from '../../../packages/security/src/keys.js';
 import { ProtectedObjectStore } from '../../../packages/security/src/store.js';
 import { createObjectHttp } from '../../../packages/security/src/http.js';
@@ -35,7 +37,11 @@ try {
   const keys = env.LDE_STORAGE_KEY_FILE ? new FileKeyProvider(env.LDE_STORAGE_KEY_FILE) : null;
   if (keys) await keys.active('asset-ticket');
   const objects = keys && pool && identity ? createObjectHttp(new ProtectedObjectStore(pool, keys), identity, env.LDE_IDENTITY_ORIGIN ?? '') : null;
+  if (env.LDE_UI_ENABLED && !['0', '1'].includes(env.LDE_UI_ENABLED)) throw new Error('Invalid UI flag');
+  if (env.LDE_UI_ENABLED === '1' && (!identity || !pool)) throw new Error('Identity required for interface');
+  const ui = env.LDE_UI_ENABLED === '1' && identity && pool ? await createUiRuntime({ assetDirectory: resolve('dist/ui'), brandId: env.LDE_UI_BRAND ?? 'engine', identity, pool, storageEnabled: !!objects }) : null;
   const api = createApi({
+    ...(ui ? { ui } : {}),
     ...(objects ? { objects } : {}),
     ...(identity ? { identity } : {}),
     ...(env.RENDER_GIT_COMMIT ? { release: env.RENDER_GIT_COMMIT } : {}),

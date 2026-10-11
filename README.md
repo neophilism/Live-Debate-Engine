@@ -4,13 +4,13 @@ A white-label operating platform for structured, motion-based debate competition
 
 ## Status
 
-The approved roadmap contains 50 engine steps and four later UBC steps. E01-E04 are merged with verified exact-head and merged-main CI. E05 protected storage is in development: encrypted private objects, quarantine, signed session-bound access, key lifecycle and auditing. See progress and actual PR records for acceptance, not just this snapshot.
+The approved roadmap contains 50 engine steps and four later UBC steps. E01-E05 are merged with verified exact-head and merged-main CI. E06 is in development with the reusable account/workspace interface, real protected-file workflows, and two neutral reference brands. See progress and actual PR records for acceptance, not just this snapshot.
 
 This is not yet a live competition platform. The engine remains separate from the politician-debate product and owns all reusable competition functionality; UBC Debates is not being implemented in parallel.
 
 ## Documentation
 
-[Approved plan](docs/DEVELOPMENT_PLAN.md) | [Requirements](docs/REQUIREMENTS.md) | [Decisions](docs/DECISIONS.md) | [Architecture](docs/ARCHITECTURE.md) | [Resources](docs/RESOURCES.md) | [Cloud access](docs/CLOUD_ACCESS.md) | [Local development](docs/DEVELOPMENT.md) | [Domain contracts](docs/DOMAIN_CONTRACTS.md) | [E03 evidence](docs/E03_EVIDENCE.md) | [E04 work](docs/E04_IDENTITY.md) | [Protected storage](docs/E05_PROTECTED_STORAGE.md) | [Progress](repo-development-progress.md) | [Handoff](docs/HANDOFF.md) | [Security](SECURITY.md)
+[Approved plan](docs/DEVELOPMENT_PLAN.md) | [Requirements](docs/REQUIREMENTS.md) | [Decisions](docs/DECISIONS.md) | [Architecture](docs/ARCHITECTURE.md) | [Resources](docs/RESOURCES.md) | [Cloud access](docs/CLOUD_ACCESS.md) | [Local development](docs/DEVELOPMENT.md) | [Domain contracts](docs/DOMAIN_CONTRACTS.md) | [E03 evidence](docs/E03_EVIDENCE.md) | [E04 work](docs/E04_IDENTITY.md) | [Protected storage](docs/E05_PROTECTED_STORAGE.md) | [Reusable interface](docs/E06_INTERFACE.md) | [Progress](repo-development-progress.md) | [Handoff](docs/HANDOFF.md) | [Security](SECURITY.md)
 
 ## Local development
 
@@ -27,7 +27,7 @@ npm run check
 npm run dev
 ```
 
-Local setup creates an ignored private configuration; it never accesses Render or Neon. `/api/health` is liveness and `/api/ready` checks schema compatibility. Neither establishes competition readiness. The configured identity API supports verified-email signup, login, MFA and revocation. No registration UI or competition-domain endpoint exists yet. Narrow read policies enforce identity, tenant/event scope and ownership; generic domain writes remain disabled.
+Local setup creates an ignored private configuration; it never accesses Render or Neon. `/api/health` is liveness and `/api/ready` checks schema compatibility. Neither establishes competition readiness. The configured identity API supports verified-email signup, login, MFA and revocation. The E06 interface can be enabled with LDE_UI_ENABLED=1 and the configured identity service; live competition-domain workflows remain later steps. Narrow read policies enforce identity, tenant/event scope and ownership; generic domain writes remain disabled.
 
 ## Invariants
 

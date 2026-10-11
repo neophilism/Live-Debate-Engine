@@ -8,11 +8,12 @@ Approved: 50 engine steps and four separate UBC steps. Counts are not effort or 
 | E02 | #2 | Merged e29a302fdeb348b0f2185ee181c83203a85e05e5; exact-head CI 38126067565 and main CI 38126144646 passed; separate security self-review 5482622645 |
 | E03 | #3 | Merged 01c90b1dc016667572c08f23190f66cadb0b028d; all five jobs passed on exact-head CI 38127969980 and main CI 38128158515; separate security self-review 5482733931 |
 | E04 | #4 | Merged fc40637f2c0af08e7b31e43b1570207922b0e1b7; exact-head CI 38151000137 and main CI 38151234814 passed all five jobs; separate self-review 5483835591 |
-| E05 | #6 | Protected storage, quarantine, signed access, keys and audit implemented locally; 128 unit/API/contract and 46 PostgreSQL cases pass. Exact-head hosted checks/review/merge pending. |
-| E06-E50 | None | Not implemented |
+| E05 | #6 | Merged 1751389581fa0e305b92967d2646fa7ed9f92977; exact-head CI 38160338358 and main CI 38160444377 passed all five jobs; separate self-review 5484260096. |
+| E06 | #8 (draft) | Reusable UI implemented; local 134 unit/API/contract and 46 PostgreSQL cases pass. Hosted real-browser/axe/keyboard and final review remain pending. |
+| E07-E50 | None | Not implemented |
 | U01-U04 | None | Not begun; U01 waits for E47 |
 
-The engine is not competition-ready: generic competition-domain writes, user interfaces, live voting, judging, media, prizes and AI still have their own approved steps. Health/schema readiness continues to report competitionReady:false. Passing identity tests does not establish those later capabilities.
+The engine is not competition-ready: generic competition-domain writes, live voting, judging, media, prizes and AI still have their own approved steps. Health/schema readiness continues to report competitionReady:false. Passing identity tests does not establish those later capabilities.
 
 Authenticated Render and Neon actions work. Exact Neon project/branch pairs are verified production branches on PostgreSQL 18. No cloud resources were mutated. Render project-container membership remains unverified with the current action set; the unrelated Debate-Engine service was not reused. See CLOUD_ACCESS.md.
 

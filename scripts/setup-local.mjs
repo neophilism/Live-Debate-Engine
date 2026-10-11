@@ -11,7 +11,7 @@ const configurations = [
     `LDE_IDENTITY_DATABASE_URL=postgresql://lde_auth_local:${identityPassword}@127.0.0.1:55432/lde_dev`,
     'LDE_IDENTITY_ENABLED=1', 'LDE_IDENTITY_ORIGIN=http://127.0.0.1:3000',
     `LDE_IDENTITY_SECRET=${randomBytes(48).toString('base64url')}`,
-    'LDE_IDENTITY_MAIL_MODE=local-file', '',
+    'LDE_IDENTITY_MAIL_MODE=local-file', 'LDE_UI_ENABLED=1', 'LDE_UI_BRAND=engine', '',
   ].join('\n')],
   ['.env.migrations', [
     'NODE_ENV=development', 'LDE_ALLOW_INSECURE_LOCAL_DB=1', `LDE_LOCAL_DB_PASSWORD=${adminPassword}`,

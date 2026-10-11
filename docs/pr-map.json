@@ -4,6 +4,7 @@
   "mappings": [
     { "step": "E01", "pr": 1 },
     { "step": "E02", "pr": 2 },
-    { "step": "E03", "pr": 3 }
+    { "step": "E03", "pr": 3 },
+    { "step": "E04", "pr": 4 }
   ]
 }

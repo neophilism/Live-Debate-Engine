@@ -4,6 +4,7 @@ import pg from 'pg';
 import { databaseConfig } from '../../dist/packages/database/src/config.js';
 import { applyMigrations, loadMigrations, migration, schemaCompatible } from '../../dist/packages/database/src/migrations.js';
 import { runDomainCases } from './domain-cases.mjs';
+import { runIdentityCases } from './identity-cases.mjs';
 import { runBoundaryCases } from './boundary-cases.mjs';
 
 const connection = process.env.TEST_DATABASE_URL;
@@ -14,7 +15,7 @@ if (!['127.0.0.1', 'localhost'].includes(target.hostname) || target.pathname !==
 test('real PostgreSQL migrations and domain persistence', async (t) => {
   const pool = new pg.Pool(databaseConfig(connection, { NODE_ENV: 'test', LDE_ALLOW_INSECURE_LOCAL_DB: '1' }));
   t.after(() => pool.end());
-  await pool.query('DROP SCHEMA IF EXISTS engine_meta CASCADE; DROP SCHEMA IF EXISTS lde CASCADE');
+  await pool.query('DROP SCHEMA IF EXISTS lde_security CASCADE; DROP SCHEMA IF EXISTS lde_auth CASCADE; DROP SCHEMA IF EXISTS engine_meta CASCADE; DROP SCHEMA IF EXISTS lde CASCADE');
   const entries = await loadMigrations();
   await t.test('fresh migration applies and schema is compatible', async () => {
     assert.equal(await applyMigrations(pool, entries), entries.length);
@@ -40,5 +41,6 @@ test('real PostgreSQL migrations and domain persistence', async (t) => {
     assert.equal(await schemaCompatible(pool, [...entries, next]), false);
   });
   await t.test('domain contracts and transactional history', async (nested) => runDomainCases(nested, pool));
+  await t.test('identity provider, MFA and authorization', async (nested) => runIdentityCases(nested, pool, connection));
   await t.test('structural boundary regressions', async (nested) => runBoundaryCases(nested, pool));
 });

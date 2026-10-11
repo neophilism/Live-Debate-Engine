@@ -9,3 +9,5 @@ artifacts/
 *.key
 *.docx
 .DS_Store
+
+.lde-mail/

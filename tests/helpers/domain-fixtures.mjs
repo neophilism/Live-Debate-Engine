@@ -4,7 +4,7 @@ import { EVENT_KINDS } from '../../dist/packages/contracts/src/domain.js';
 export const uuid = (number) => `${number.toString(16).padStart(8, '0')}-1111-4111-8111-111111111111`;
 export const WHEN = '2026-10-11T09:00:00.000Z';
 export const usd = (minorUnits) => ({ currency: 'USD', minorUnits, exponent: 2 });
-export function fixtureSet(tenantId = uuid(1), seed = 100) {
+export function fixtureSet(tenantId = uuid(1), seed = 100, judgePrincipalId = uuid(900)) {
   let next = seed;
   const eventId = uuid(seed + 90);
   const created = [];
@@ -31,7 +31,7 @@ export function fixtureSet(tenantId = uuid(1), seed = 100) {
     deadlines: { aiReviewHours: 24, outcomeDisputeHours: 48, paymentTargetDays: 30, paymentDeadlineDays: 60 },
   });
   const event = add('event', { title: 'Synthetic event', seriesRef: referenceOf(series), motionRef: referenceOf(motion), rulesetRef: referenceOf(ruleset), format: 'standalone', mode: 'remote' });
-  const assignment = add('assignment', { principalId: uuid(900), role: 'judge', teamRef: null });
+  const assignment = add('assignment', { principalId: judgePrincipalId, role: 'judge', teamRef: null });
   const contract = add('contract', { motionRef: referenceOf(motion), rulesetRef: referenceOf(ruleset), forTeamRef: referenceOf(team), againstTeamRef: referenceOf(team2), prizeBudget: usd('1800000'), startsAt: WHEN, timeZone: 'America/New_York', publication: 'live', embargoUntil: null });
   const session = add('session', { contractRef: referenceOf(contract), phase: 'preparation' });
   const poll = add('poll', { motionRef: referenceOf(motion), round: 'pre', state: 'scheduled', opensAt: WHEN, closesAt: '2026-10-11T09:02:00.000Z' });

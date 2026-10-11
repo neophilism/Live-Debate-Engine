@@ -1,9 +1,11 @@
 import type { PoolConfig } from 'pg';
 
 export type DatabaseEnvironment = Readonly<Record<string, string | undefined>>;
+// pg 8.16 supports this documented option; @types/pg 8.15.5 omits it.
+export type VerifiedPoolConfig = PoolConfig & { enableChannelBinding: true };
 
 /** Never let URI sslmode options override explicit certificate verification. */
-export function databaseConfig(connectionString: string, env: DatabaseEnvironment = {}): PoolConfig {
+export function databaseConfig(connectionString: string, env: DatabaseEnvironment = {}): VerifiedPoolConfig {
   if (env.NODE_ENV && !['development', 'test', 'production'].includes(env.NODE_ENV)) throw new Error('Invalid environment');
   let url: URL;
   try { url = new URL(connectionString); } catch { throw new Error('Invalid database URL'); }
@@ -15,7 +17,9 @@ export function databaseConfig(connectionString: string, env: DatabaseEnvironmen
   if (insecure && (!local || env.NODE_ENV === 'production')) throw new Error('Plaintext database connections are restricted to local development');
   const mode = url.searchParams.get('sslmode');
   if (mode && !['require', 'verify-full'].includes(mode) && !(mode === 'disable' && insecure)) throw new Error('Unsupported database TLS mode');
-  // Connection parameters cannot introduce additional host, certificate or filesystem settings.
+  // The driver can prefer channel binding, not enforce require. Do not silently downgrade.
+  const binding = url.searchParams.get('channel_binding');
+  if (binding && binding !== 'prefer') throw new Error('Unsupported mandatory or disabled channel-binding policy');
   for (const key of [...url.searchParams.keys()]) {
     if (!['sslmode', 'channel_binding'].includes(key)) throw new Error('Unsupported database URL option');
     url.searchParams.delete(key);

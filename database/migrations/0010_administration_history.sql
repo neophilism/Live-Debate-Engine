@@ -106,8 +106,10 @@ LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $body$
 DECLARE p uuid; intent jsonb:=jsonb_build_object('op','save-event-admin','event',e,'expected',expected,'data',d);
  result jsonb; r lde.revisions; prior lde.revisions; motion lde.revisions; series_id uuid; motion_id uuid; motion_revision integer; final_data jsonb;
 BEGIN
- p:=lde_competition.authorize('event.manage',t,e); result:=lde_competition.replay(t,c,intent);
- p:=lde_competition.authorize('event.manage',t,e); IF result IS NOT NULL THEN RETURN result; END IF;
+ IF expected=0 THEN p:=lde_competition.authorize('tenant.manage',t,NULL); ELSE p:=lde_competition.authorize('event.manage',t,e); END IF;
+ result:=lde_competition.replay(t,c,intent);
+ IF expected=0 THEN p:=lde_competition.authorize('tenant.manage',t,NULL); ELSE p:=lde_competition.authorize('event.manage',t,e); END IF;
+ IF result IS NOT NULL THEN RETURN result; END IF;
  IF jsonb_typeof(d)<>'object' OR (SELECT array_agg(key ORDER BY key) FROM jsonb_object_keys(d) key)
     IS DISTINCT FROM ARRAY['broadcastMode','motionId','motionRevision','seriesId','title','venue']::text[]
  THEN RAISE EXCEPTION USING ERRCODE='22023',MESSAGE='Invalid event administration fields'; END IF;

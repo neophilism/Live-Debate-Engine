@@ -21,5 +21,5 @@ test('motion, event, publication and amendment parsers reject ambiguous input', 
   assert.equal(eventInput(event).data.broadcastMode, 'public-stream');
   assert.throws(() => eventInput({ ...event, data: { ...event.data, broadcastMode: 'social-video' } }));
   assert.equal(publishAdministrationInput({ commandId: id(6), expectedRevision: 2 }).expectedRevision, 2);
-  assert.throws(() => amendmentInput({ commandId: id(7), expectedMotionRevision: 2, expectedEventRevision: 4, data: { ...motion.data, reason: 'short' } }));
+  assert.throws(() => amendmentInput({ commandId: id(7), expectedMotionRevision: 2, expectedEventRevision: 4, data: { wording: motion.data.wording, description: motion.data.description, categories: motion.data.categories, reason: 'short' } }));
 });

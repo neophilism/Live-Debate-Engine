@@ -13,6 +13,7 @@ import { createCompetitionHttp } from '../../dist/packages/competition/src/http.
 import { createApi } from '../../dist/apps/api/src/server.js';
 import { sourceManualProfile } from '../../dist/packages/competition/src/model.js';
 import { competitionFixture } from '../helpers/competition-fixtures.mjs';
+import { runAdministrationCases } from './administration-cases.mjs';
 
 export async function runCompetitionCases(t, admin, connection) {
   const names = ['lde_material_auth_test', 'lde_material_app_test']; const pools = [];
@@ -33,6 +34,7 @@ export async function runCompetitionCases(t, admin, connection) {
   http = createCompetitionHttp(store, identity, origin, (line) => logs.push(line));
   t.after(async () => { await identity.drain(); server.closeAllConnections(); await new Promise((r) => server.close(r)); for (const p of pools) await p.end(); for (const n of names) await admin.query(`DROP ROLE ${n}`); });
   const x = await competitionFixture({ admin, origin, identity, mails, store }); const { f, organizer, a, b, outsider } = x;
+  await t.test('E08 immutable credential-bound administration', async (nested) => runAdministrationCases(admin, appPool, x));
   const endpoint = `/api/tenants/${f.tenantId}/events/${f.eventId}/contract`;
   const post = (u, path, body) => u.client.call(path, { method: 'POST', body });
   const workspace = (u = organizer) => store.workspace(u.token, f.tenantId, f.eventId);
@@ -230,7 +232,7 @@ export async function runCompetitionCases(t, admin, connection) {
       await assert.rejects(appPool.query(query), e => e.code === '42501'); await assert.rejects(authPool.query(query), e => e.code === '42501');
     }
     const functions = await admin.query("SELECT p.proname, p.proconfig, pg_get_userbyid(p.proowner) AS owner, has_function_privilege('lde_runtime',p.oid,'EXECUTE') AS runtime, has_function_privilege('lde_identity',p.oid,'EXECUTE') AS identity FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='lde_competition'");
-    assert.deepEqual(functions.rows.filter(r => r.runtime).map(r => r.proname).sort(), ['acknowledge_contract','contract_visible','contract_workspace','offer_contract','publish_ruleset','ruleset_records','save_contract','save_ruleset']);
+    assert.deepEqual(functions.rows.filter(r => r.runtime).map(r => r.proname).sort(), ['acknowledge_contract','amend_published_motion','contract_visible','contract_workspace','offer_contract','publish_event_admin','publish_motion','publish_ruleset','ruleset_records','save_contract','save_event_admin','save_motion','save_ruleset','save_series']);
     assert.ok(functions.rows.every(r => !r.identity && r.owner === 'lde_guard' && r.proconfig[0] === 'search_path=pg_catalog, pg_temp'));
     assert.equal((await admin.query("SELECT count(*)::int AS n FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace, LATERAL aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a WHERE n.nspname='lde_competition' AND a.grantee=0 AND a.privilege_type='EXECUTE'")).rows[0].n, 0);
     const tables = await admin.query("SELECT c.relname,c.relrowsecurity,c.relforcerowsecurity,has_table_privilege('lde_runtime',c.oid,'SELECT,INSERT,UPDATE,DELETE,TRUNCATE') AS runtime FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='lde_competition' AND c.relkind='r'");

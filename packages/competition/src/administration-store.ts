@@ -6,7 +6,7 @@ import { canonicalJson } from '../../contracts/src/canonical.js';
 
 const calendarDate = (value: unknown): string => {
   const parsed = text(10, 10)(value);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(parsed) || new Date(parsed + 'T00:00:00.000Z').toISOString().slice(0, 10) !== parsed) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(parsed) || new Date(`${parsed}T00:00:00.000Z`).toISOString().slice(0, 10) !== parsed) {
     throw new TypeError('Expected calendar date');
   }
   return parsed;

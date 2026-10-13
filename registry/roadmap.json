@@ -61,7 +61,9 @@
     {
       "id": "E-08",
       "title": "Series, motions, and event administration",
-      "pullRequests": []
+      "pullRequests": [
+        12
+      ]
     },
     {
       "id": "E-09",

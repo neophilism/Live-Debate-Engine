@@ -1,0 +1,105 @@
+version: 2.1
+
+# Native CircleCI parity for Node 22/24, PostgreSQL 17/18, browser,
+# Gitleaks and E2EESA integrity. No required matrix leg silently skipped.
+jobs:
+  foundation:
+    parameters:
+      node_version:
+        type: string
+    docker:
+      - image: cimg/node:<< parameters.node_version >>
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Require reviewed lockfile
+          command: git ls-files --error-unmatch package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm run check
+      - run: npm audit --audit-level=high
+      - run:
+          name: Produce exact tested source evidence
+          command: |
+            mkdir -p artifacts
+            git archive --format=tar --output=artifacts/source.tar HEAD
+            npm run artifacts
+      - store_artifacts:
+          path: artifacts
+
+  postgres-integration:
+    parameters:
+      pg_version:
+        type: string
+    docker:
+      - image: cimg/node:24.21.0
+      - image: postgres:<< parameters.pg_version >>
+        environment:
+          POSTGRES_DB: lde_ci
+          POSTGRES_USER: lde_ci
+          POSTGRES_PASSWORD: local_ci_only
+    resource_class: medium
+    environment:
+      NODE_ENV: test
+      TEST_DATABASE_URL: postgresql://lde_ci:local_ci_only@127.0.0.1:5432/lde_ci
+    steps:
+      - checkout
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npm run test:integration
+
+  browser-accessibility-and-identity:
+    docker:
+      - image: cimg/node:24.21.0-browsers
+      - image: postgres:18
+        environment:
+          POSTGRES_DB: lde_ci
+          POSTGRES_USER: lde_ci
+          POSTGRES_PASSWORD: local_ci_only
+    resource_class: large
+    environment:
+      NODE_ENV: test
+      TEST_DATABASE_URL: postgresql://lde_ci:local_ci_only@127.0.0.1:5432/lde_ci
+    steps:
+      - checkout
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: npm run test:browser
+      - store_artifacts:
+          path: artifacts/browser
+
+  secret-history-scan:
+    docker:
+      - image: cimg/go:1.25
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Compile pinned Gitleaks scanner and scan source history
+          command: |
+            go install github.com/gitleaks/gitleaks/v8@v8.24.0
+            "$(go env GOPATH)/bin/gitleaks" git --redact --exit-code 1 .
+
+  security-status-record:
+    docker:
+      - image: cimg/python:3.12
+    resource_class: small
+    steps:
+      - checkout
+      - run: python3 scripts/validate_e2eesa_status.py
+
+workflows:
+  required-ci:
+    jobs:
+      - foundation:
+          matrix:
+            parameters:
+              node_version: ["22.20.0", "24.21.0"]
+      - postgres-integration:
+          matrix:
+            parameters:
+              pg_version: ["17", "18"]
+      - browser-accessibility-and-identity
+      - secret-history-scan
+      - security-status-record

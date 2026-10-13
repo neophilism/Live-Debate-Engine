@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { AccessError } from '../../identity/src/broker.js';
 import type { IdentityRuntime } from '../../identity/src/http.js';
+import { identifier } from '../../contracts/src/validation.js';
 import { securityLogLine } from '../../security/src/logging.js';
 import type { AdministrationStore } from './administration-store.js';
 
@@ -134,25 +135,31 @@ export function createAdministrationHttp(
         const actor = await identity.authenticate(request);
         const input = await readJson(request);
         if (series) {
-          send(200, await store.saveSeries(actor.token, series[1], series[2], input));
+          send(200, await store.saveSeries(actor.token, identifier('tenant')(series[1]), identifier('series')(series[2]), input));
         } else if (motion) {
           send(
             200,
             motion[3]
-              ? await store.publishMotion(actor.token, motion[1], motion[2], input)
-              : await store.saveMotion(actor.token, motion[1], motion[2], input),
+              ? await store.publishMotion(actor.token, identifier('tenant')(motion[1]), identifier('motion')(motion[2]), input)
+              : await store.saveMotion(actor.token, identifier('tenant')(motion[1]), identifier('motion')(motion[2]), input),
           );
         } else if (amendment) {
           send(
             200,
-            await store.amendPublishedMotion(actor.token, amendment[1], amendment[2], amendment[3], input),
+            await store.amendPublishedMotion(
+              actor.token,
+              identifier('tenant')(amendment[1]),
+              identifier('event')(amendment[2]),
+              identifier('motion')(amendment[3]),
+              input,
+            ),
           );
         } else if (event) {
           send(
             200,
             event[3]
-              ? await store.publishEvent(actor.token, event[1], event[2], input)
-              : await store.saveEvent(actor.token, event[1], event[2], input),
+              ? await store.publishEvent(actor.token, identifier('tenant')(event[1]), identifier('event')(event[2]), input)
+              : await store.saveEvent(actor.token, identifier('tenant')(event[1]), identifier('event')(event[2]), input),
           );
         }
       } catch (error) {

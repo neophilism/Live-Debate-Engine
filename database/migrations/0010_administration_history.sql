@@ -1,10 +1,12 @@
 -- E08: immutable series, motion and event administration on the shared snapshot ledger.
 CREATE FUNCTION lde_competition.admin_text(v jsonb,k text,minimum integer,maximum integer)
 RETURNS text LANGUAGE plpgsql IMMUTABLE SET search_path=pg_catalog,pg_temp AS $body$
-DECLARE result text;
+DECLARE result text; text_units integer;
 BEGIN
+  IF jsonb_typeof(v->k)<>'string' THEN RAISE EXCEPTION USING ERRCODE='22023',MESSAGE='Invalid administration text'; END IF;
   result:=v->>k;
-  IF result IS NULL OR length(btrim(result))<minimum OR length(result)>maximum OR result<>normalize(result,NFC)
+  SELECT coalesce(sum(CASE WHEN ascii(ch)>65535 THEN 2 ELSE 1 END),0) INTO text_units FROM regexp_split_to_table(result,'') ch;
+  IF length(btrim(result))<minimum OR text_units<minimum OR text_units>maximum OR result<>normalize(result,NFC)
   THEN RAISE EXCEPTION USING ERRCODE='22023',MESSAGE='Invalid administration text'; END IF;
   RETURN result;
 END;
@@ -16,10 +18,11 @@ DECLARE n integer;
 BEGIN
   IF jsonb_typeof(v)<>'array' OR jsonb_array_length(v)<1 OR jsonb_array_length(v)>12
   THEN RAISE EXCEPTION USING ERRCODE='22023',MESSAGE='Invalid motion categories'; END IF;
-  SELECT count(*) INTO n FROM jsonb_array_elements_text(v) item
-   WHERE length(btrim(item)) BETWEEN 1 AND 80 AND item=normalize(item,NFC);
+  PERFORM lde_competition.admin_text(jsonb_build_object('value',item.value),'value',1,80)
+    FROM jsonb_array_elements(v) item;
+  SELECT count(*) INTO n FROM jsonb_array_elements(v) item WHERE jsonb_typeof(item.value)='string';
   IF n<>jsonb_array_length(v) OR
-     (SELECT count(DISTINCT lower(item)) FROM jsonb_array_elements_text(v) item)<>n
+     (SELECT count(DISTINCT lower(item.value#>>'{}')) FROM jsonb_array_elements(v) item)<>n
   THEN RAISE EXCEPTION USING ERRCODE='22023',MESSAGE='Invalid motion categories'; END IF;
   RETURN v;
 END;

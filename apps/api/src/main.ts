@@ -1,3 +1,5 @@
+import { AdministrationStore } from '../../../packages/competition/src/administration-store.js';
+import { createAdministrationHttp } from '../../../packages/competition/src/administration-http.js';
 import { CompetitionStore } from '../../../packages/competition/src/store.js';
 import { createCompetitionHttp } from '../../../packages/competition/src/http.js';
 import { createUiRuntime } from '../../../packages/ui/src/http.js';
@@ -41,7 +43,9 @@ try {
   if (env.LDE_UI_ENABLED && !['0', '1'].includes(env.LDE_UI_ENABLED)) throw new Error('Invalid UI flag');
   const ui = env.LDE_UI_ENABLED === '0' ? null : await createUiRuntime(env.LDE_UI_BRAND ?? 'harbor', !!identity);
   const competition = pool && identity ? createCompetitionHttp(new CompetitionStore(pool), identity, env.LDE_IDENTITY_ORIGIN ?? '') : null;
+  const administration = pool && identity ? createAdministrationHttp(new AdministrationStore(pool), identity, env.LDE_IDENTITY_ORIGIN ?? '') : null;
   const api = createApi({
+    ...(administration ? { administration } : {}),
     ...(competition ? { competition } : {}),
     ...(ui ? { ui } : {}),
     ...(objects ? { objects } : {}),

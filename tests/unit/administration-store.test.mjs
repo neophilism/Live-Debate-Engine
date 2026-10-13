@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { amendmentInput, eventInput, motionInput, publishAdministrationInput, seriesInput } from '../../packages/competition/src/administration-store.ts';
+import { amendmentInput, eventInput, motionInput, publishAdministrationInput, seriesInput } from '../../dist/packages/competition/src/administration-store.js';
 
 const id = (n) => `${n.toString(16).padStart(8, '0')}-1111-4111-8111-111111111111`;
 

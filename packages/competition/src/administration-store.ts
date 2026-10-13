@@ -1,7 +1,8 @@
+import { createHash } from 'node:crypto';
 import type { Pool } from 'pg';
 import { withCredential } from '../../identity/src/broker.js';
 import { array, enumeration, identifier, integer, object, text } from '../../contracts/src/validation.js';
-import { snapshotOf } from '../../contracts/src/snapshot.js';
+import { canonicalJson } from '../../contracts/src/canonical.js';
 
 const calendarDate = (value: unknown): string => {
   const parsed = text(10, 10)(value);
@@ -51,8 +52,8 @@ function verifyResult(result: unknown): Record<string, unknown> {
     if (envelope === undefined) continue;
     if (envelope === null || typeof envelope !== 'object' || Array.isArray(envelope)) throw new Error('Invalid administration envelope');
     const record = envelope as Record<string, unknown>;
-    const snapshot = snapshotOf(record.snapshot);
-    if (snapshot.contentHash !== record.contentHash) throw new Error('Administration snapshot integrity failure');
+    const contentHash = createHash('sha256').update(canonicalJson(record.snapshot), 'utf8').digest('hex');
+    if (contentHash !== record.contentHash) throw new Error('Administration snapshot integrity failure');
   }
   return output;
 }

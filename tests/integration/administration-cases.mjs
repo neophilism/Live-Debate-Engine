@@ -31,7 +31,7 @@ export async function runAdministrationCases(t, appPool, fixture) {
   const amendment = await store.amendPublishedMotion(organizer.token, f.tenantId, f.eventId, motionId, {
     commandId: randomUUID(), expectedMotionRevision: publishedMotion.current.snapshot.revision,
     expectedEventRevision: publishedEvent.current.snapshot.revision,
-    data: { ...motionData, wording: 'Resolved: cities should repeal mandatory parking minimums.', reason: 'Clarify that the policy concerns mandatory minimums.' },
+    data: { wording: 'Resolved: cities should repeal mandatory parking minimums.', description: motionData.description, categories: motionData.categories, reason: 'Clarify that the policy concerns mandatory minimums.' },
   });
   assert.equal(amendment.motion.snapshot.revision, publishedMotion.current.snapshot.revision + 1);
   assert.equal(amendment.event.snapshot.data.motionRevision, amendment.motion.snapshot.revision);
@@ -40,7 +40,7 @@ export async function runAdministrationCases(t, appPool, fixture) {
   await assert.rejects(store.amendPublishedMotion(organizer.token, f.tenantId, f.eventId, motionId, {
     commandId: randomUUID(), expectedMotionRevision: publishedMotion.current.snapshot.revision,
     expectedEventRevision: publishedEvent.current.snapshot.revision,
-    data: { ...motionData, wording: 'Another wording.', reason: 'This stale amendment must fail atomically.' },
+    data: { wording: 'Another wording.', description: motionData.description, categories: motionData.categories, reason: 'This stale amendment must fail atomically.' },
   }));
   const counts = await appPool.query("SELECT kind,count(*)::int AS n FROM lde.revisions WHERE tenant_id=$1 AND entity_id=ANY($2::uuid[]) GROUP BY kind", [f.tenantId, [motionId, f.eventId]]);
   assert.equal(counts.rows.find((row) => row.kind === 'motion').n, 3);

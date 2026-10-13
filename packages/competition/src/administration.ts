@@ -12,6 +12,8 @@ export type Series = Readonly<{
 
 export type MotionRevision = Readonly<{
   motionId: string;
+  tenantId: string;
+  seriesId: string;
   revision: number;
   wording: string;
   description: string;
@@ -104,6 +106,8 @@ export function createSeries(input: Series): Series {
 export function createMotion(input: Omit<MotionRevision, 'revision' | 'state' | 'amendment'>): MotionRevision {
   return freeze({
     motionId: identifier(input.motionId, 'motion id'),
+    tenantId: identifier(input.tenantId, 'tenant id'),
+    seriesId: identifier(input.seriesId, 'series id'),
     revision: 1,
     wording: text(input.wording, 'motion wording', 2_000),
     description: text(input.description, 'motion description', 10_000),
@@ -138,6 +142,7 @@ export function publishMotion(current: MotionRevision, expectedRevision: number)
 export function createEvent(input: Omit<EventAdministration, 'revision' | 'state'>, series: Series, motion: MotionRevision): EventAdministration {
   if (input.tenantId !== series.tenantId) throw new Error('event and series tenant must match');
   if (input.seriesId !== series.id) throw new Error('event must reference the supplied series');
+  if (motion.tenantId !== series.tenantId || motion.seriesId !== series.id) throw new Error('motion and event must belong to the supplied tenant and series');
   if (motion.state !== 'published') throw new Error('event must reference a published motion');
   if (input.motionId !== motion.motionId || input.motionRevision !== motion.revision) throw new Error('event must bind the exact published motion revision');
   if (!['none', 'private-stream', 'public-stream', 'prerecorded'].includes(input.broadcastMode)) throw new RangeError('unsupported broadcast mode');

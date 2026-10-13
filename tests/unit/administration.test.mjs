@@ -5,7 +5,7 @@ import { amendPublishedMotion, createEvent, createMotion, createSeries, publishE
 const actor = 'organizer-1';
 const at = '2027-01-01T12:00:00.000Z';
 const series = createSeries({ id: 'series-1', tenantId: 'tenant-1', name: 'Civic Forum', season: '2027', startsOn: '2027-01-01', endsOn: '2027-12-31' });
-const draft = createMotion({ motionId: 'motion-1', wording: 'Resolved: cities should eliminate parking minimums.', description: 'Urban land-use policy.', categories: ['Housing', 'Transport'], createdAt: at, createdBy: actor });
+const draft = createMotion({ motionId: 'motion-1', tenantId: series.tenantId, seriesId: series.id, wording: 'Resolved: cities should eliminate parking minimums.', description: 'Urban land-use policy.', categories: ['Housing', 'Transport'], createdAt: at, createdBy: actor });
 
 test('series and motion inputs are normalized, validated and immutable', () => {
   assert.equal(series.name, 'Civic Forum');
@@ -31,6 +31,8 @@ test('an event binds one exact published motion revision', () => {
   assert.equal(publishEvent(event, 1).state, 'published');
   assert.throws(() => createEvent({ ...event, motionRevision: 99 }, series, motion), /exact published motion/);
   assert.throws(() => createEvent({ ...event, tenantId: 'another-tenant' }, series, motion), /tenant/);
+  const otherSeriesMotion = { ...motion, seriesId: 'series-2' };
+  assert.throws(() => createEvent(event, series, otherSeriesMotion), /supplied tenant and series/);
 });
 
 test('published wording cannot be silently edited', () => {

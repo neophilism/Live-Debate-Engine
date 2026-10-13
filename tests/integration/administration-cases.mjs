@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { AdministrationStore } from '../../dist/packages/competition/src/administration-store.js';
 import { administerAccess } from '../../dist/packages/identity/src/administration.js';
+import { withCredential } from '../../dist/packages/identity/src/broker.js';
 
 export async function runAdministrationCases(admin, appPool, fixture) {
   const { f, organizer, outsider } = fixture;
@@ -18,6 +19,15 @@ export async function runAdministrationCases(admin, appPool, fixture) {
   assert.equal(firstSeries.current.snapshot.snapshotId, replayedSeries.current.snapshot.snapshotId);
   assert.equal(replayedSeries.replayed, true);
   assert.equal(firstSeries.current.snapshot.data.updatedBy, organizer.principalId);
+  const rawSeries = (data) => withCredential(appPool, organizer.token, (client) => client.query(
+    'SELECT lde_competition.save_series($1,$2,0,$3,$4)', [f.tenantId, randomUUID(), JSON.stringify(data), randomUUID()],
+  ));
+  await assert.rejects(rawSeries({ ...seriesData, name: 7 }));
+  await assert.rejects(rawSeries({ ...seriesData, name: '😀'.repeat(101) }));
+  const rawMotion = (data) => withCredential(appPool, organizer.token, (client) => client.query(
+    'SELECT lde_competition.save_motion($1,$2,0,$3,$4)', [f.tenantId, randomUUID(), JSON.stringify(data), randomUUID()],
+  ));
+  await assert.rejects(rawMotion({ ...motionData, categories: [7] }));
 
   const draftMotion = await store.saveMotion(organizer.token, f.tenantId, motionId, { commandId: randomUUID(), expectedRevision: 0, data: motionData });
   const publishedMotion = await store.publishMotion(organizer.token, f.tenantId, motionId, { commandId: randomUUID(), expectedRevision: draftMotion.current.snapshot.revision });

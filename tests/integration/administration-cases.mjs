@@ -9,8 +9,6 @@ export async function runAdministrationCases(admin, appPool, fixture) {
   const seriesId = randomUUID();
   const motionId = randomUUID();
   const eventId = randomUUID();
-  await administerAccess(admin, 'role', { principalId: organizer.principalId, tenantId: f.tenantId, eventId, role: 'organizer', expiresAt: null, revoked: 'no', reason: 'Synthetic E08 organizer scope' });
-  await administerAccess(admin, 'role', { principalId: outsider.principalId, tenantId: f.tenantId, eventId, role: 'audience', expiresAt: null, revoked: 'no', reason: 'Synthetic E08 denial scope' });
   const seriesData = { name: 'Synthetic Civic Forum', season: '2027', startsOn: '2027-01-01', endsOn: '2027-12-31' };
   const motionData = { seriesId, wording: 'Resolved: cities should eliminate parking minimums.', description: 'Synthetic urban land-use policy.', categories: ['Housing', 'Transport'] };
 
@@ -27,8 +25,10 @@ export async function runAdministrationCases(admin, appPool, fixture) {
   await assert.rejects(store.saveMotion(organizer.token, f.tenantId, motionId, { commandId: randomUUID(), expectedRevision: 2, data: { ...motionData, wording: 'Silent replacement.' } }));
 
   const eventData = { seriesId, motionId, motionRevision: publishedMotion.current.snapshot.revision, title: 'Synthetic Housing Debate', venue: 'City Hall', broadcastMode: 'public-stream' };
-  await assert.rejects(store.saveEvent(outsider.token, f.tenantId, eventId, { commandId: randomUUID(), expectedRevision: 0, data: eventData }));
   const draftEvent = await store.saveEvent(organizer.token, f.tenantId, eventId, { commandId: randomUUID(), expectedRevision: 0, data: eventData });
+  await administerAccess(admin, 'role', { principalId: organizer.principalId, tenantId: f.tenantId, eventId, role: 'organizer', expiresAt: null, revoked: 'no', reason: 'Synthetic E08 organizer scope' });
+  await administerAccess(admin, 'role', { principalId: outsider.principalId, tenantId: f.tenantId, eventId, role: 'audience', expiresAt: null, revoked: 'no', reason: 'Synthetic E08 denial scope' });
+  await assert.rejects(store.saveEvent(outsider.token, f.tenantId, eventId, { commandId: randomUUID(), expectedRevision: draftEvent.current.snapshot.revision, data: eventData }));
   const publishedEvent = await store.publishEvent(organizer.token, f.tenantId, eventId, { commandId: randomUUID(), expectedRevision: draftEvent.current.snapshot.revision });
   assert.equal(publishedEvent.current.snapshot.data.state, 'published');
 

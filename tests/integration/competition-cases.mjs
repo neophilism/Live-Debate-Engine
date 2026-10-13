@@ -13,6 +13,7 @@ import { createCompetitionHttp } from '../../dist/packages/competition/src/http.
 import { createApi } from '../../dist/apps/api/src/server.js';
 import { sourceManualProfile } from '../../dist/packages/competition/src/model.js';
 import { competitionFixture } from '../helpers/competition-fixtures.mjs';
+import { runAdministrationCases } from './administration-cases.mjs';
 
 export async function runCompetitionCases(t, admin, connection) {
   const names = ['lde_material_auth_test', 'lde_material_app_test']; const pools = [];
@@ -33,6 +34,7 @@ export async function runCompetitionCases(t, admin, connection) {
   http = createCompetitionHttp(store, identity, origin, (line) => logs.push(line));
   t.after(async () => { await identity.drain(); server.closeAllConnections(); await new Promise((r) => server.close(r)); for (const p of pools) await p.end(); for (const n of names) await admin.query(`DROP ROLE ${n}`); });
   const x = await competitionFixture({ admin, origin, identity, mails, store }); const { f, organizer, a, b, outsider } = x;
+  await t.test('E08 immutable credential-bound administration', async (nested) => runAdministrationCases(nested, appPool, x));
   const endpoint = `/api/tenants/${f.tenantId}/events/${f.eventId}/contract`;
   const post = (u, path, body) => u.client.call(path, { method: 'POST', body });
   const workspace = (u = organizer) => store.workspace(u.token, f.tenantId, f.eventId);

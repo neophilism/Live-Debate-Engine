@@ -59,7 +59,8 @@ function verifyResult(result: unknown): Record<string, unknown> {
 
 /** Fixed credential-bound E08 operations; callers cannot supply principals or SQL. */
 export class AdministrationStore {
-  constructor(private readonly pool: Pool) {}
+  private readonly pool: Pool;
+  constructor(pool: Pool) { this.pool = pool; }
   private async call(credential: string, sql: string, values: readonly unknown[]) {
     return withCredential(this.pool, credential, async (client) => {
       const response = await client.query<{ result: unknown }>(sql, [...values]);

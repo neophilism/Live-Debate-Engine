@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { selectBrand } from './branding.js';
-const pages = new Set(['/', '/app', '/sign-in', '/register', '/verify-email', '/reset-request', '/reset-password', '/security', '/workspaces', '/workspace', '/components', '/rulesets', '/contract']);
+const pages = new Set(['/', '/app', '/sign-in', '/register', '/verify-email', '/reset-request', '/reset-password', '/security', '/workspaces', '/workspace', '/components', '/rulesets', '/contract', '/administration']);
 export type UiRuntime = Readonly<{ handle: (request: IncomingMessage, response: ServerResponse) => boolean }>;
 export async function createUiRuntime(brandId: string, identityEnabled: boolean): Promise<UiRuntime> {
   const brand = selectBrand(brandId);
@@ -32,3 +32,5 @@ export async function createUiRuntime(brandId: string, identityEnabled: boolean)
   }
   return Object.freeze({ handle });
 }
+
+

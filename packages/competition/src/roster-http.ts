@@ -4,7 +4,7 @@ import { AccessError } from '../../identity/src/broker.js';
 import { identifier } from '../../contracts/src/validation.js';
 import { HttpError, readJson } from './http.js';
 import type { RosterStore } from './roster-store.js';
-/** Adapter remains unmounted until the organizer roster interface is integrated. */
+/** Credential-bound draft operations; never activates competition assignments. */
 export function createRosterHttp(store: RosterStore, identity: IdentityRuntime, origin: string) {
   return Object.freeze({ handle: async (request: IncomingMessage, response: ServerResponse): Promise<boolean> => {
     let url: URL; try { url = new URL(request.url ?? '/', origin); } catch { return false; }

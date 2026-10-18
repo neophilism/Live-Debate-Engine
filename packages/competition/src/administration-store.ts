@@ -55,6 +55,10 @@ function verifyResult(result: unknown): Record<string, unknown> {
     const contentHash = createHash('sha256').update(canonicalJson(record.snapshot), 'utf8').digest('hex');
     if (contentHash !== record.contentHash) throw new Error('Administration snapshot integrity failure');
   }
+  if (output.records !== undefined) {
+    if (!Array.isArray(output.records) || output.records.length > 50) throw new Error('Invalid administration page');
+    for (const envelope of output.records) verifyResult({ current: envelope });
+  }
   return output;
 }
 
@@ -67,6 +71,11 @@ export class AdministrationStore {
       const response = await client.query<{ result: unknown }>(sql, [...values]);
       return verifyResult(response.rows[0]?.result);
     });
+  }
+  records(credential: string, tenantId: string, kind: 'series' | 'motion' | 'event', entityId: string | null = null, beforeId: string | null = null, beforeRevision = 2147483647) {
+    return this.call(credential, 'SELECT lde_competition.administration_records($1,$2,$3,$4,$5) AS result',
+      [identifier('tenant')(tenantId), enumeration(['series', 'motion', 'event'] as const)(kind),
+        entityId === null ? null : identifier('entity')(entityId), beforeId === null ? null : identifier('entity')(beforeId), integer(1)(beforeRevision)]);
   }
   saveSeries(credential: string, tenantId: string, seriesId: string, input: unknown) {
     const body = seriesInput(input);
@@ -101,3 +110,5 @@ export class AdministrationStore {
         body.expectedMotionRevision, body.expectedEventRevision, JSON.stringify(body.data), body.commandId]);
   }
 }
+
+

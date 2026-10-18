@@ -1,3 +1,5 @@
+import { RosterStore } from '../../dist/packages/competition/src/roster-store.js';
+import { createRosterHttp } from '../../dist/packages/competition/src/roster-http.js';
 import { runRosterDraftCases } from './roster-draft-cases.mjs';
 import assert from 'node:assert/strict';
 import { randomBytes, randomUUID } from 'node:crypto';
@@ -27,16 +29,26 @@ export async function runCompetitionCases(t, admin, connection) {
     if (url.password) await admin.query((await admin.query('SELECT format(\'ALTER ROLE %I PASSWORD %L\',$1::text,$2::text) AS sql', [role, decodeURIComponent(url.password)])).rows[0].sql);
     pools.push(new pg.Pool({ ...databaseConfig(url.toString(), { NODE_ENV: 'test', LDE_ALLOW_INSECURE_LOCAL_DB: '1' }), max: 5 }));
   }
-  const [authPool, appPool] = pools; let identity; let http; const mails = []; const logs = [];
+  const [authPool, appPool] = pools; let identity; let http; let roster; const mails = []; const logs = [];
   const store = new CompetitionStore(appPool);
-  const server = createApi({ readiness: async () => ({ ready: true, reason: 'schema_compatible' }), identity: { handle: (...args) => identity.handle(...args) }, competition: { handle: (...args) => http.handle(...args) } });
+  const server = createApi({ roster: { handle: (...args) => roster.handle(...args) }, readiness: async () => ({ ready: true, reason: 'schema_compatible' }), identity: { handle: (...args) => identity.handle(...args) }, competition: { handle: (...args) => http.handle(...args) } });
   server.listen(0, '127.0.0.1'); await once(server, 'listening'); const origin = `http://127.0.0.1:${server.address().port}`;
   identity = await createIdentityRuntime({ pool: authPool, runtimePool: appPool, config: { origin, secret: randomBytes(48).toString('base64url'), environment: 'test' }, sendMail: async (m) => mails.push(m) });
   http = createCompetitionHttp(store, identity, origin, (line) => logs.push(line));
+  roster = createRosterHttp(new RosterStore(appPool), identity, origin);
   t.after(async () => { await identity.drain(); server.closeAllConnections(); await new Promise((r) => server.close(r)); for (const p of pools) await p.end(); for (const n of names) await admin.query(`DROP ROLE ${n}`); });
   const x = await competitionFixture({ admin, origin, identity, mails, store }); const { f, organizer, a, b, outsider } = x;
   await t.test('E08 immutable credential-bound administration', async (nested) => runAdministrationCases(admin, appPool, x));
   await t.test('E09 credential-bound casting reviews and roster drafts', async () => runRosterDraftCases(admin, appPool, x));
+  await t.test('E09 real roster HTTP cannot turn draft data into operational roles', async () => {
+    const path = `/api/tenants/${f.tenantId}/events/${f.eventId}/roster`;
+    const w = await organizer.client.call(path); assert.equal(w.status, 200); assert.equal(w.data.operational, false);
+    assert.equal((await outsider.client.call(path)).status, 404);
+    assert.equal((await organizer.client.call(path.replace(f.tenantId, randomUUID()))).status, 404);
+    assert.equal((await organizer.client.call(path+'?actor='+outsider.principalId)).status, 400);
+    const invalid = await organizer.client.call(path+'/reviews/'+outsider.principalId, { method: 'POST', body: { commandId: randomUUID(), expectedRevision: 1, actor: organizer.principalId, data: {} } });
+    assert.equal(invalid.status, 400);
+  });
   const endpoint = `/api/tenants/${f.tenantId}/events/${f.eventId}/contract`;
   const post = (u, path, body) => u.client.call(path, { method: 'POST', body });
   const workspace = (u = organizer) => store.workspace(u.token, f.tenantId, f.eventId);

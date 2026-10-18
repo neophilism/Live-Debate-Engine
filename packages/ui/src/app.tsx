@@ -1,3 +1,4 @@
+import { AdministrationPage } from './administration.js';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { RulesetsPage, ContractPage } from './competition.js';
 import { createRoot } from 'react-dom/client';
@@ -58,7 +59,7 @@ function Workspaces() {
 function WorkspaceView() {
   const [row, setRow] = useState<Workspace | null>(null); const [error, setError] = useState('');
   useEffect(() => { let alive = true; const params = new URL(window.location.href).searchParams; void request('/api/workspaces').then((raw) => { const found = parseWorkspaces(raw).find((item) => item.tenantId === params.get('tenant') && item.eventId === params.get('event')); if (!found || !found.capabilities.length) throw new Error('This workspace is not available. Verify your authenticator or ask the organizer to review your assignment.'); if (alive) setRow(found); }).catch((e: unknown) => { if (alive) setError(e instanceof Error ? e.message : 'Access unavailable.'); }); return () => { alive = false; }; }, []);
-  return <><PageTitle eyebrow="Role workspace" title="Your event access" />{error ? <Notice tone="error">{error}</Notice> : row === null ? <Notice>Checking current permissions...</Notice> : <><Panel title={row.eventId ? `Event ${row.eventId.slice(0, 8)}` : `Organization ${row.tenantId.slice(0, 8)}`}><p>Your roles: <strong>{row.roles.join(', ')}</strong></p><div className="actions">{row.capabilities.includes('ruleset.manage') && <a className="button" href={`/rulesets?tenant=${row.tenantId}`}>Competition rulesets</a>}{row.eventId && row.capabilities.includes('event.read') && <a className="button secondary" href={`/contract?tenant=${row.tenantId}&event=${row.eventId}`}>Review competition contract</a>}</div><p>This workspace shows your verified permissions. Live-event controls arrive with the corresponding competition workflows; no inactive control here can issue an event command.</p></Panel><DataTable caption="Currently authorized operations" headings={['Operation', 'State']}>{row.capabilities.map((action) => <tr key={action}><th scope="row">{action.split('.').join(' / ')}</th><td>{['ruleset.manage', 'contract.manage', 'contract.acknowledge'].includes(action) ? 'Material workflow available; current state checked on each action' : 'Permission only; workflow not yet enabled'}</td></tr>)}</DataTable></>}<div className="form-links"><a href="/workspaces">Back to my workspaces</a></div></>;
+  return <><PageTitle eyebrow="Role workspace" title="Your event access" />{error ? <Notice tone="error">{error}</Notice> : row === null ? <Notice>Checking current permissions...</Notice> : <><Panel title={row.eventId ? `Event ${row.eventId.slice(0, 8)}` : `Organization ${row.tenantId.slice(0, 8)}`}><p>Your roles: <strong>{row.roles.join(', ')}</strong></p><div className="actions">{row.capabilities.includes('tenant.manage') && <a className="button" href={`/administration?tenant=${row.tenantId}`}>Series, motions, and events</a>}{row.capabilities.includes('ruleset.manage') && <a className="button" href={`/rulesets?tenant=${row.tenantId}`}>Competition rulesets</a>}{row.eventId && row.capabilities.includes('event.read') && <a className="button secondary" href={`/contract?tenant=${row.tenantId}&event=${row.eventId}`}>Review competition contract</a>}</div><p>This workspace shows your verified permissions. Live-event controls arrive with the corresponding competition workflows; no inactive control here can issue an event command.</p></Panel><DataTable caption="Currently authorized operations" headings={['Operation', 'State']}>{row.capabilities.map((action) => <tr key={action}><th scope="row">{action.split('.').join(' / ')}</th><td>{['ruleset.manage', 'contract.manage', 'contract.acknowledge'].includes(action) ? 'Material workflow available; current state checked on each action' : 'Permission only; workflow not yet enabled'}</td></tr>)}</DataTable></>}<div className="form-links"><a href="/workspaces">Back to my workspaces</a></div></>;
 }
 function Security({ session }: { session: Session }) {
   const [setup, setSetup] = useState<{ uri: string; codes: string[] } | null>(null); const [sessions, setSessions] = useState<{ id: string; createdAt: string; expiresAt: string }[]>([]); const [error, setError] = useState(''); const [busy, setBusy] = useState('');
@@ -79,7 +80,7 @@ function Application() {
     if (alive) { document.title = `${brand.name} | Debate workspace`; setState({ brand, session, identityEnabled: config.identityEnabled === true }); }
   })().catch((e: unknown) => { if (alive) setError(e instanceof Error ? e.message : 'Unable to load the workspace.'); }); return () => { alive = false; }; }, []);
   if (!state) return <main className="loading-page" id="main"><h1>Debate workspace</h1>{error ? <Notice tone="error">{error} <a href={path}>Try again</a>.</Notice> : <Notice>Loading your workspace...</Notice>}</main>;
-  const protectedPage = ['/app', '/workspaces', '/workspace', '/security', '/rulesets', '/contract'].includes(path);
+  const protectedPage = ['/app', '/workspaces', '/workspace', '/security', '/rulesets', '/contract', '/administration'].includes(path);
   let content: ReactNode;
   if (protectedPage && !state.session) content = <><PageTitle eyebrow="Account access" title="Sign in to continue" /><Notice>{state.identityEnabled ? <a href="/sign-in">Sign in to view your personal workspace.</a> : 'Account access has not been configured on this server.'}</Notice></>;
   else if (['/sign-in', '/register', '/verify-email', '/reset-request', '/reset-password'].includes(path) && !state.identityEnabled) content = <><PageTitle eyebrow="Setup required" title="Account access unavailable" /><Notice>Identity is not configured. No account request has been submitted.</Notice></>;
@@ -92,6 +93,7 @@ function Application() {
   else if (path === '/security' && state.session) content = <Security session={state.session} />;
   else if (path === '/workspaces') content = <Workspaces />;
   else if (path === '/workspace') content = <WorkspaceView />;
+  else if (path === '/administration') content = <AdministrationPage />;
   else if (path === '/rulesets') content = <RulesetsPage />;
   else if (path === '/contract') content = <ContractPage />;
   else if (path === '/components') content = <ComponentReference />;
@@ -100,3 +102,5 @@ function Application() {
 }
 const target = document.getElementById('app');
 if (target) createRoot(target).render(<Application />);
+
+

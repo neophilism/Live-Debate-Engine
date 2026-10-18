@@ -37,11 +37,12 @@ The explicit `operational:false` result is required by the store. Historical
 receipts and drafts may outlive a membership/review; they never establish current
 eligibility or permission. Finalization must recheck all current prerequisites.
 The HTTP adapter validates fixed routes, current identity, same-origin POST,
-bounded JSON, query/cursor shape and nondisclosing no-store errors, but it is
-intentionally not mounted in the application until the organizer workflow is
-integrated. No deployment or production roster feature is claimed.
+bounded JSON, query/cursor shape and nondisclosing no-store errors. It is mounted
+only when identity and the database are configured, through the same application
+runtime as other competition APIs. The organizer casting interface and live
+assignment activation are not implemented. No deployment is claimed.
 
-Remaining acceptance: integrate the latest main application wiring, invitation
+Remaining acceptance: invitation
 and application intake, profiles/credentials, organizer review/casting interface,
 substitutions and schedule/availability workflows, explicit conflict review,
 finalization with live revalidation, and transactional propagation to releases,
@@ -55,3 +56,7 @@ and no implicit judge-role grant. Exact pinned type/lint/build and real database
 results must be observed from CI at the committed SHA; local transpilation is
 not a full typecheck or PostgreSQL acceptance. No new credentials, paid resources,
 schedules or real participant data are introduced.
+
+The E09 branch incorporates the exact merged E08 prerequisite application files
+from dface0b3 before mounting the new draft API, preserving its administration
+interface and real browser journeys. No E08 behavior is removed.

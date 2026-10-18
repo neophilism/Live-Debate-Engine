@@ -1,0 +1,27 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createServer } from 'node:http';
+import { once } from 'node:events';
+import { randomUUID } from 'node:crypto';
+import { createRosterHttp } from '../../dist/packages/competition/src/roster-http.js';
+import { AccessError } from '../../dist/packages/identity/src/broker.js';
+test('draft roster adapter authenticates and checks origin before invoking fixed operations', async t => {
+  const tenant = randomUUID(), event = randomUUID(), principal = randomUUID(); const calls = []; let failure;
+  const store = Object.fromEntries(['workspace','review','saveDraft'].map(name => [name, async (...args) => { if (failure) throw failure; calls.push([name,...args]); return { operational: false }; }]));
+  let runtime; const server = createServer(async (req,res) => { if (!await runtime.handle(req,res)) { res.writeHead(404); res.end(); } });
+  server.listen(0,'127.0.0.1'); await once(server,'listening'); const origin = `http://127.0.0.1:${server.address().port}`;
+  runtime = createRosterHttp(store,{authenticate: async req => { if (req.headers.cookie !== 'fixture=yes') throw new AccessError(401); return {token:'Synthetic-credential-000000'}; }},origin);
+  t.after(async () => { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); });
+  const path = `/api/tenants/${tenant}/events/${event}/roster`;
+  const get = (url,headers={}) => fetch(origin+url,{headers:{cookie:'fixture=yes',...headers}});
+  const post = (url,headers={}) => fetch(origin+url,{method:'POST',headers:{cookie:'fixture=yes',origin,'content-type':'application/json',...headers},body:'{}'});
+  assert.equal((await get(path,{cookie:''})).status,401);
+  assert.equal((await post(path+'/draft',{origin:'https://untrusted.invalid'})).status,403);
+  assert.equal(calls.length,0);
+  assert.equal((await get(path+'?before='+principal)).status,200); assert.equal(calls.at(-1)[0],'workspace'); assert.equal(calls.at(-1).at(-1),principal);
+  assert.equal((await post(path+'/reviews/'+principal)).status,200); assert.equal(calls.at(-1)[0],'review'); assert.equal(calls.at(-1)[1],'Synthetic-credential-000000');
+  assert.equal((await post(path+'/draft')).status,200); assert.equal(calls.at(-1)[0],'saveDraft');
+  for (const url of [path+'?before=bad',path+'?before='+principal+'&before='+principal,path+'?actor='+principal]) assert.equal((await get(url)).status,400);
+  assert.equal((await post(path+'/draft?before='+principal)).status,400);
+  failure=Object.assign(new Error('private data'),{code:'55000'}); const response=await get(path); assert.equal(response.status,409); assert.equal(response.headers.get('cache-control'),'no-store'); assert.ok(!(await response.text()).includes('private'));
+});

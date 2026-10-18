@@ -6,8 +6,8 @@ import { identifier, integer } from '../../contracts/src/validation.js';
 import { securityLogLine } from '../../security/src/logging.js';
 import type { CompetitionStore } from './store.js';
 
-class HttpError extends Error { constructor(readonly status: number, readonly code: string) { super(code); } }
-async function readJson(request: IncomingMessage): Promise<unknown> {
+export class HttpError extends Error { constructor(readonly status: number, readonly code: string) { super(code); } }
+export async function readJson(request: IncomingMessage): Promise<unknown> {
   if (request.headers['content-type'] !== 'application/json') throw new HttpError(415, 'json_required');
   if (request.headers['content-encoding'] && request.headers['content-encoding'] !== 'identity') throw new HttpError(415, 'unsupported_encoding');
   const size = request.headers['content-length'];
@@ -83,3 +83,4 @@ export function createCompetitionHttp(store: CompetitionStore, identity: Identit
     return true;
   } });
 }
+

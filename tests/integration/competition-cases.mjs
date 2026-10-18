@@ -1,3 +1,5 @@
+import { AdministrationStore } from '../../dist/packages/competition/src/administration-store.js';
+import { createAdministrationHttp } from '../../dist/packages/competition/src/administration-http.js';
 import assert from 'node:assert/strict';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { once } from 'node:events';
@@ -26,15 +28,30 @@ export async function runCompetitionCases(t, admin, connection) {
     if (url.password) await admin.query((await admin.query('SELECT format(\'ALTER ROLE %I PASSWORD %L\',$1::text,$2::text) AS sql', [role, decodeURIComponent(url.password)])).rows[0].sql);
     pools.push(new pg.Pool({ ...databaseConfig(url.toString(), { NODE_ENV: 'test', LDE_ALLOW_INSECURE_LOCAL_DB: '1' }), max: 5 }));
   }
-  const [authPool, appPool] = pools; let identity; let http; const mails = []; const logs = [];
+  const [authPool, appPool] = pools; let identity; let http; let administration; const mails = []; const logs = [];
   const store = new CompetitionStore(appPool);
-  const server = createApi({ readiness: async () => ({ ready: true, reason: 'schema_compatible' }), identity: { handle: (...args) => identity.handle(...args) }, competition: { handle: (...args) => http.handle(...args) } });
+  const server = createApi({ administration: { handle: (...args) => administration.handle(...args) }, readiness: async () => ({ ready: true, reason: 'schema_compatible' }), identity: { handle: (...args) => identity.handle(...args) }, competition: { handle: (...args) => http.handle(...args) } });
   server.listen(0, '127.0.0.1'); await once(server, 'listening'); const origin = `http://127.0.0.1:${server.address().port}`;
   identity = await createIdentityRuntime({ pool: authPool, runtimePool: appPool, config: { origin, secret: randomBytes(48).toString('base64url'), environment: 'test' }, sendMail: async (m) => mails.push(m) });
   http = createCompetitionHttp(store, identity, origin, (line) => logs.push(line));
+  administration = createAdministrationHttp(new AdministrationStore(appPool), identity, origin);
   t.after(async () => { await identity.drain(); server.closeAllConnections(); await new Promise((r) => server.close(r)); for (const p of pools) await p.end(); for (const n of names) await admin.query(`DROP ROLE ${n}`); });
   const x = await competitionFixture({ admin, origin, identity, mails, store }); const { f, organizer, a, b, outsider } = x;
   await t.test('E08 immutable credential-bound administration', async (nested) => runAdministrationCases(admin, appPool, x));
+  await t.test('E08 real HTTP respects organizer credential scope, revocation and conflicts', async () => {
+    const path = `/api/tenants/${f.tenantId}/administration/series`;
+    assert.equal((await organizer.client.call(path)).status, 200);
+    assert.equal((await outsider.client.call(path)).status, 404);
+    assert.equal((await organizer.client.call(path.replace(f.tenantId, randomUUID()))).status, 404);
+    const entity = randomUUID();
+    const input = { commandId: randomUUID(), expectedRevision: 0, data: { name: 'Synthetic HTTP series', season: '2027', startsOn: '2027-01-01', endsOn: '2027-12-31' } };
+    const first = await organizer.client.call(`${path}/${entity}`, { method: 'POST', body: input });
+    assert.equal(first.status, 200); assert.equal(first.data.current.snapshot.revision, 1);
+    const replay = await organizer.client.call(`${path}/${entity}`, { method: 'POST', body: input });
+    assert.equal(replay.status, 200); assert.equal(replay.data.replayed, true);
+    assert.equal((await organizer.client.call(`${path}/${entity}`, { method: 'POST', body: { ...input, commandId: randomUUID() } })).status, 409);
+    assert.equal((await organizer.client.call(`${path}/${entity}`, { method: 'POST', body: { ...input, principalId: organizer.principalId } })).status, 400);
+  });
   const endpoint = `/api/tenants/${f.tenantId}/events/${f.eventId}/contract`;
   const post = (u, path, body) => u.client.call(path, { method: 'POST', body });
   const workspace = (u = organizer) => store.workspace(u.token, f.tenantId, f.eventId);
@@ -232,7 +249,7 @@ export async function runCompetitionCases(t, admin, connection) {
       await assert.rejects(appPool.query(query), e => e.code === '42501'); await assert.rejects(authPool.query(query), e => e.code === '42501');
     }
     const functions = await admin.query("SELECT p.proname, p.proconfig, pg_get_userbyid(p.proowner) AS owner, has_function_privilege('lde_runtime',p.oid,'EXECUTE') AS runtime, has_function_privilege('lde_identity',p.oid,'EXECUTE') AS identity FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='lde_competition'");
-    assert.deepEqual(functions.rows.filter(r => r.runtime).map(r => r.proname).sort(), ['acknowledge_contract','amend_published_motion','contract_visible','contract_workspace','offer_contract','publish_event_admin','publish_motion','publish_ruleset','ruleset_records','save_contract','save_event_admin','save_motion','save_ruleset','save_series']);
+    assert.deepEqual(functions.rows.filter(r => r.runtime).map(r => r.proname).sort(), ['acknowledge_contract','administration_records','amend_published_motion','contract_visible','contract_workspace','offer_contract','publish_event_admin','publish_motion','publish_ruleset','ruleset_records','save_contract','save_event_admin','save_motion','save_ruleset','save_series']);
     assert.ok(functions.rows.every(r => !r.identity && r.owner === 'lde_guard' && r.proconfig[0] === 'search_path=pg_catalog, pg_temp'));
     assert.equal((await admin.query("SELECT count(*)::int AS n FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace, LATERAL aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a WHERE n.nspname='lde_competition' AND a.grantee=0 AND a.privilege_type='EXECUTE'")).rows[0].n, 0);
     const tables = await admin.query("SELECT c.relname,c.relrowsecurity,c.relforcerowsecurity,has_table_privilege('lde_runtime',c.oid,'SELECT,INSERT,UPDATE,DELETE,TRUNCATE') AS runtime FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='lde_competition' AND c.relkind='r'");
@@ -241,3 +258,4 @@ export async function runCompetitionCases(t, admin, connection) {
     const audit = await admin.query('SELECT count(*)::int AS n FROM lde_competition.audit WHERE tenant_id=$1', [f.tenantId]); assert.ok(audit.rows[0].n > 10);
   });
 }
+

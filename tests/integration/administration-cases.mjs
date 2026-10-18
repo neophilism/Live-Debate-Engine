@@ -56,7 +56,27 @@ export async function runAdministrationCases(admin, appPool, fixture) {
     expectedEventRevision: publishedEvent.current.snapshot.revision,
     data: { wording: 'Another wording.', description: motionData.description, categories: motionData.categories, reason: 'This stale amendment must fail atomically.' },
   }));
+  const listed = await store.records(organizer.token, f.tenantId, 'motion');
+  assert.equal(listed.records.find(row => row.snapshot.entityId === motionId).snapshot.revision, 3);
+  const history = await store.records(organizer.token, f.tenantId, 'motion', motionId);
+  assert.deepEqual(history.records.map(row => row.snapshot.revision), [3, 2, 1]);
+  assert.equal(history.records[2].snapshot.data.wording, motionData.wording);
+  assert.equal((await store.records(organizer.token, f.tenantId, 'motion', motionId, null, 3)).records.length, 2);
+  await assert.rejects(store.records(outsider.token, f.tenantId, 'series'));
+  await assert.rejects(store.records(organizer.token, randomUUID(), 'series'));
+  await assert.rejects(withCredential(appPool, organizer.token, client => client.query(
+    'SELECT lde_competition.administration_records($1,$2,NULL,NULL,1)', [f.tenantId, 'untrusted-table'])));
+  // A page boundary must not drop or duplicate entity identities.
+  for (let n = 0; n < 51; n++) await store.saveSeries(organizer.token, f.tenantId, randomUUID(), {
+    commandId: randomUUID(), expectedRevision: 0, data: { ...seriesData, name: `Synthetic pagination ${n}` },
+  });
+  const firstPage = await store.records(organizer.token, f.tenantId, 'series');
+  assert.equal(firstPage.records.length, 50); assert.ok(firstPage.nextCursor);
+  const secondPage = await store.records(organizer.token, f.tenantId, 'series', null, firstPage.nextCursor);
+  const ids = [...firstPage.records, ...secondPage.records].map(row => row.snapshot.entityId);
+  assert.equal(new Set(ids).size, ids.length); assert.ok(ids.includes(seriesId));
   const counts = await admin.query("SELECT kind,count(*)::int AS n FROM lde.revisions WHERE tenant_id=$1 AND entity_id=ANY($2::uuid[]) GROUP BY kind", [f.tenantId, [motionId, eventId]]);
   assert.equal(counts.rows.find((row) => row.kind === 'motion').n, 3);
   assert.equal(counts.rows.find((row) => row.kind === 'event').n, 3);
 }
+

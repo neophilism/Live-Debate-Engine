@@ -1,3 +1,7 @@
+import { administrationJourney } from './administration-cases.mjs';
+import { AdministrationStore } from '../../dist/packages/competition/src/administration-store.js';
+import { createAdministrationHttp } from '../../dist/packages/competition/src/administration-http.js';
+import { administerAccess } from '../../dist/packages/identity/src/administration.js';
 import test from 'node:test';
 import { runCompetitionBrowserCases } from './competition-cases.mjs';
 import { CompetitionStore } from '../../dist/packages/competition/src/store.js';
@@ -51,13 +55,14 @@ test('Actual browser, identity, SQL and two-brand competition journeys', { timeo
     pools.push(new pg.Pool({ ...databaseConfig(url.toString(), { NODE_ENV: 'test', LDE_ALLOW_INSECURE_LOCAL_DB: '1' }), max: index === 0 ? 5 : 1 }));
   }
   async function serve(brand) {
-    let runtime; let competition; const mail = []; const store = new CompetitionStore(pools[1]);
+    let runtime; let competition; let administration; const mail = []; const store = new CompetitionStore(pools[1]);
     const ui = await createUiRuntime(brand, true);
-    const api = createApi({ ui, readiness: async () => ({ ready: true, reason: 'schema_compatible' }), identity: { handle: async (...args) => runtime.handle(...args) }, competition: { handle: (...args) => competition.handle(...args) } });
+    const api = createApi({ ui, administration: { handle: (...args) => administration.handle(...args) }, readiness: async () => ({ ready: true, reason: 'schema_compatible' }), identity: { handle: async (...args) => runtime.handle(...args) }, competition: { handle: (...args) => competition.handle(...args) } });
     api.listen(0, '127.0.0.1'); await once(api, 'listening');
     const origin = `http://127.0.0.1:${api.address().port}`;
     runtime = await createIdentityRuntime({ pool: pools[0], runtimePool: pools[1], config: { origin, secret: randomBytes(48).toString('base64url'), environment: 'test' }, sendMail: async (message) => { mail.push(message); } });
     competition = createCompetitionHttp(store, runtime, origin, () => {});
+    administration = createAdministrationHttp(new AdministrationStore(pools[1]), runtime, origin);
     const server = { api, runtime, origin, mail, store }; servers.push(server); return server;
   }
   const harbor = await serve('harbor'); const cedar = await serve('cedar');
@@ -177,4 +182,21 @@ test('Actual browser, identity, SQL and two-brand competition journeys', { timeo
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)); assert.deepEqual(errors, []);
   });
   await t.test('E07 actual material contract journeys', (nested) => runCompetitionBrowserCases(nested, { admin, appPool: pools[1], browser, harbor, cedar, audit }));
+  await t.test('E08 real organizer administration, history, ambiguity and stale-revision journeys', async () => {
+    await admin.query('DELETE FROM lde_auth."rateLimit"');
+    await administerAccess(admin, 'role', { principalId: principal, tenantId: f.tenantId, eventId: null, role: 'organizer', expiresAt: null, revoked: 'no', reason: 'Synthetic organizer browser fixture' });
+    const organizerContext = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' });
+    try {
+      const organizerPage = await organizerContext.newPage();
+      await organizerPage.goto(`${harbor.origin}/sign-in`); await organizerPage.getByLabel('Email address').fill(email); await organizerPage.getByLabel('Password', { exact: true }).fill('New-Synthetic-Password-456!');
+      await organizerPage.getByRole('button', { name: 'Sign in', exact: true }).click(); await organizerPage.getByLabel('Authenticator code').fill(authenticatorCode(`otpauth://totp/Test?secret=${secret}`));
+      await organizerPage.getByRole('button', { name: 'Verify sign-in', exact: true }).click(); await expect(organizerPage).toHaveURL(`${harbor.origin}/app`);
+      await administrationJourney({ page: organizerPage, origin: harbor.origin, tenant: f.tenantId, expect, audit, grantEvent: eventId => administerAccess(admin, 'role', {
+        principalId: principal, tenantId: f.tenantId, eventId, role: 'organizer', expiresAt: null, revoked: 'no', reason: 'Synthetic explicit event organizer assignment',
+      }) });
+      await organizerPage.screenshot({ path: 'artifacts/browser/organizer-administration.png', fullPage: true });
+    } finally { await organizerContext.close(); }
+  });
+
 });
+

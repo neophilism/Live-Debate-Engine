@@ -108,3 +108,6 @@ textarea { resize: vertical; }
 .material-list > li { padding: 8px 0; }
 summary { cursor: pointer; min-height: 44px; padding: 12px 0; font-weight: 600; }
 .motion-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+
+.administration select,.administration textarea{width:100%;font:inherit;color:inherit;background:var(--surface,white);border:1px solid var(--border,#8b969e);border-radius:8px;padding:12px;min-height:44px}.administration ul{padding-left:20px}.administration li{margin-block:12px}.administration button{white-space:normal;overflow-wrap:anywhere}.administration-editor{min-width:0}.administration .checkbox{display:flex;gap:10px;align-items:flex-start;margin-block:16px}.administration .checkbox input{min-width:20px;min-height:20px}.administration fieldset{min-width:0}

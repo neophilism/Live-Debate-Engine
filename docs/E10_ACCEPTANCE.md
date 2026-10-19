@@ -21,3 +21,9 @@ The two new isolated unit suites are `event-acceptance.test.mjs` and `legal-temp
 ## Durable integration prerequisite
 
 The canonical development plan depends on E09 roster/identity preparation. The E09 provisional casting work is not merged, and no authenticated document publisher or participant acceptance ledger is yet connected to the database. Do not create an E10 migration that collides with E09's pending 0012 sequence. After upstream integration, implement a new additive guarded migration and a database-backed immutable ledger with verified server timestamps, idempotent commands, participant-bound consent and guardian evidence; add event-specific retrieval, revocation/supersession, privacy retention and real browser/PG negative tests. No deployment or signature validity is claimed by this document.
+
+## Further isolated verification (2026-10-19)
+
+The E10 branch now also contains strict acceptance intent and immutable consent-history projectors, a fail-closed guardian/employee-family evidence matrix, and a legal template transition validator. The projection accepts only strictly increasing ledger sequence with canonical nondecreasing timestamps, exact document scope and revision, and an exact-target withdrawal. A new wording/body/jurisdiction change cannot silently reuse the same published legal revision. No helper grants participation or claims a valid signature.
+
+Fourteen synthetic Node.js isolated model tests passed with mirrored source files whose git-blob hashes matched the immutable Boardroom source reads. This is targeted development evidence, **not** an observed pass for the repository's latest GitHub Actions, PostgreSQL migration, actual browser, or legal review. The exhaustive security/transaction and privacy acceptance matrix remains in `docs/E10_DURABLE_LEDGER_DESIGN.md`. The release ledger and authenticated server endpoints remain unimplemented until dependencies are reconciled. Keep PR20 draft.

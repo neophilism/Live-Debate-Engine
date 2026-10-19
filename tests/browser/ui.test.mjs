@@ -204,6 +204,15 @@ test('Actual browser, identity, SQL and two-brand competition journeys', { timeo
       await expect(organizerPage.getByText('No role is activated here.', { exact: false })).toBeVisible();
       await expect(organizerPage.getByRole('heading', { name: 'Review a candidate' })).toBeVisible();
       assert.equal((await organizerPage.request.get(`${harbor.origin}/api/tenants/${f.tenantId}/events/${createdEventId}/roster`)).status(), 200);
+      const rosterUrl = `${harbor.origin}/api/tenants/${f.tenantId}/events/${createdEventId}/roster`;
+      assert.equal((await organizerPage.request.get(`${rosterUrl}?before=invalid`)).status(), 400);
+      assert.equal((await organizerPage.request.get(`${harbor.origin}/api/tenants/${randomUUID()}/events/${createdEventId}/roster`)).status(), 404);
+      assert.equal((await organizerPage.request.post(`${rosterUrl}/draft`, { headers: { origin: 'https://cross-origin.invalid' }, data: {} })).status(), 403);
+      const anonymous = await browser.newContext();
+      try { assert.equal((await anonymous.request.get(rosterUrl)).status(), 401); } finally { await anonymous.close(); }
+      await organizerPage.setViewportSize({ width: 390, height: 900 });
+      assert.ok(await organizerPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Mobile casting view must not overflow');
+      await organizerPage.setViewportSize({ width: 1440, height: 1000 });
       await audit(organizerPage);
       await organizerPage.screenshot({ path: 'artifacts/browser/organizer-administration.png', fullPage: true });
     } finally { await organizerContext.close(); }

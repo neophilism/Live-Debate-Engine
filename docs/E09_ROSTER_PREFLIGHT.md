@@ -39,8 +39,7 @@ eligibility or permission. Finalization must recheck all current prerequisites.
 The HTTP adapter validates fixed routes, current identity, same-origin POST,
 bounded JSON, query/cursor shape and nondisclosing no-store errors. It is mounted
 only when identity and the database are configured, through the same application
-runtime as other competition APIs. The organizer casting interface and live
-assignment activation are not implemented. No deployment is claimed.
+runtime as other competition APIs. A provisional organizer casting interface is now mounted at `/roster` for authenticated users, with a scoped entry point from event administration. It uses draft-only operations, current candidate reviews and explicit stale-state recovery. This is not a complete casting, invitation or live-assignment interface; live assignment activation remains unimplemented. No deployment is claimed.
 
 Remaining acceptance: invitation
 and application intake, profiles/credentials, organizer review/casting interface,
@@ -60,3 +59,9 @@ schedules or real participant data are introduced.
 The E09 branch incorporates the exact merged E08 prerequisite application files
 from dface0b3 before mounting the new draft API, preserving its administration
 interface and real browser journeys. No E08 behavior is removed.
+
+## Browser draft-workspace increment
+
+`packages/ui/src/roster-client.ts` rejects any response that does not explicitly carry `operational:false`, uses same-origin browser credentials without persistent credential storage, and retains a command UUID for identical intents after uncertain transport outcomes. `packages/ui/src/roster.tsx` provides an event-scoped provisional review and JSON draft editor. It marks the editor stale after a rejected draft and requires an explicit refresh; it never treats a saved draft as an active event role. The source-only unit test for the transport is `tests/unit/roster-client.test.mjs`.
+
+This screen is an interim authorized organizer tool, not complete E-09 acceptance. No browser accessibility, PostgreSQL integration, or current-head CI success is claimed for this increment. Add review pagination, validated structured roster controls, safe resubmission after lost review responses, participant invitations, legal release gates, and explicit live revalidation before considering this unit complete.

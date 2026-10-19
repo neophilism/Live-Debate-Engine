@@ -1,6 +1,8 @@
 import { administrationJourney } from './administration-cases.mjs';
 import { AdministrationStore } from '../../dist/packages/competition/src/administration-store.js';
 import { createAdministrationHttp } from '../../dist/packages/competition/src/administration-http.js';
+import { RosterStore } from '../../dist/packages/competition/src/roster-store.js';
+import { createRosterHttp } from '../../dist/packages/competition/src/roster-http.js';
 import { administerAccess } from '../../dist/packages/identity/src/administration.js';
 import test from 'node:test';
 import { runCompetitionBrowserCases } from './competition-cases.mjs';
@@ -55,14 +57,15 @@ test('Actual browser, identity, SQL and two-brand competition journeys', { timeo
     pools.push(new pg.Pool({ ...databaseConfig(url.toString(), { NODE_ENV: 'test', LDE_ALLOW_INSECURE_LOCAL_DB: '1' }), max: index === 0 ? 5 : 1 }));
   }
   async function serve(brand) {
-    let runtime; let competition; let administration; const mail = []; const store = new CompetitionStore(pools[1]);
+    let runtime; let competition; let administration; let roster; const mail = []; const store = new CompetitionStore(pools[1]);
     const ui = await createUiRuntime(brand, true);
-    const api = createApi({ ui, administration: { handle: (...args) => administration.handle(...args) }, readiness: async () => ({ ready: true, reason: 'schema_compatible' }), identity: { handle: async (...args) => runtime.handle(...args) }, competition: { handle: (...args) => competition.handle(...args) } });
+    const api = createApi({ ui, roster: { handle: (...args) => roster.handle(...args) }, administration: { handle: (...args) => administration.handle(...args) }, readiness: async () => ({ ready: true, reason: 'schema_compatible' }), identity: { handle: async (...args) => runtime.handle(...args) }, competition: { handle: (...args) => competition.handle(...args) } });
     api.listen(0, '127.0.0.1'); await once(api, 'listening');
     const origin = `http://127.0.0.1:${api.address().port}`;
     runtime = await createIdentityRuntime({ pool: pools[0], runtimePool: pools[1], config: { origin, secret: randomBytes(48).toString('base64url'), environment: 'test' }, sendMail: async (message) => { mail.push(message); } });
     competition = createCompetitionHttp(store, runtime, origin, () => {});
     administration = createAdministrationHttp(new AdministrationStore(pools[1]), runtime, origin);
+    roster = createRosterHttp(new RosterStore(pools[1]), runtime, origin);
     const server = { api, runtime, origin, mail, store }; servers.push(server); return server;
   }
   const harbor = await serve('harbor'); const cedar = await serve('cedar');
@@ -191,9 +194,17 @@ test('Actual browser, identity, SQL and two-brand competition journeys', { timeo
       await organizerPage.goto(`${harbor.origin}/sign-in`); await organizerPage.getByLabel('Email address').fill(email); await organizerPage.getByLabel('Password', { exact: true }).fill('New-Synthetic-Password-456!');
       await organizerPage.getByRole('button', { name: 'Sign in', exact: true }).click(); await organizerPage.getByLabel('Authenticator code').fill(authenticatorCode(`otpauth://totp/Test?secret=${secret}`));
       await organizerPage.getByRole('button', { name: 'Verify sign-in', exact: true }).click(); await expect(organizerPage).toHaveURL(`${harbor.origin}/app`);
-      await administrationJourney({ page: organizerPage, origin: harbor.origin, tenant: f.tenantId, expect, audit, grantEvent: eventId => administerAccess(admin, 'role', {
+      let createdEventId;
+      await administrationJourney({ page: organizerPage, origin: harbor.origin, tenant: f.tenantId, expect, audit, grantEvent: eventId => { createdEventId = eventId; return administerAccess(admin, 'role', {
         principalId: principal, tenantId: f.tenantId, eventId, role: 'organizer', expiresAt: null, revoked: 'no', reason: 'Synthetic explicit event organizer assignment',
-      }) });
+      }); } });
+      assert.ok(createdEventId, 'An event must be created before testing its scoped casting workspace');
+      await organizerPage.goto(`${harbor.origin}/roster?tenant=${f.tenantId}&event=${createdEventId}`);
+      await expect(organizerPage.getByRole('heading', { name: 'Provisional casting roster' })).toBeVisible();
+      await expect(organizerPage.getByText('No role is activated here.', { exact: false })).toBeVisible();
+      await expect(organizerPage.getByRole('heading', { name: 'Review a candidate' })).toBeVisible();
+      assert.equal((await organizerPage.request.get(`${harbor.origin}/api/tenants/${f.tenantId}/events/${createdEventId}/roster`)).status(), 200);
+      await audit(organizerPage);
       await organizerPage.screenshot({ path: 'artifacts/browser/organizer-administration.png', fullPage: true });
     } finally { await organizerContext.close(); }
   });

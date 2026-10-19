@@ -9,10 +9,16 @@ export function RosterPage() {
   const tenant = query.get('tenant') ?? '', event = query.get('event') ?? '';
   const [workspace, setWorkspace] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState(''); const [stale, setStale] = useState(false);
+  const [reviewRows, setReviewRows] = useState<Record<string, unknown>[]>([]);
+  const [nextReview, setNextReview] = useState<string | null>(null);
+  const [paging, setPaging] = useState(false);
   const intent = useRef<RosterDraftCommand | null>(null);
   const reviewIntent = useRef<RosterDraftCommand | null>(null);
   const reload = async () => {
-    try { setWorkspace(await client.workspace(tenant, event)); setError(''); setStale(false); }
+    try { const current = await client.workspace(tenant, event); setWorkspace(current);
+      setReviewRows(Array.isArray(current.reviews) ? current.reviews as Record<string, unknown>[] : []);
+      setNextReview(typeof current.nextCandidate === 'string' ? identifier('principal')(current.nextCandidate) : null);
+      setError(''); setStale(false); }
     catch { setStale(true); setError('Roster unavailable. Check organizer access.'); }
   };
   useEffect(() => { if (tenant && event) void reload(); }, [tenant, event]);
@@ -27,8 +33,7 @@ export function RosterPage() {
     <Panel title="Review a candidate"><ActionForm submitLabel="Record review" action={async data => {
       if (stale) throw new Error('Refresh stale reviews first.');
       const candidate = identifier('principal')(field(data, 'candidate'));
-      const reviews = Array.isArray(workspace.reviews) ? workspace.reviews as Record<string, unknown>[] : [];
-      const current = reviews.find(r => r.candidate_id === candidate);
+      const current = reviewRows.find(r => r.candidate_id === candidate);
       const expectedRevision = typeof current?.revision === 'number' ? current.revision : 0;
       const body = { eligible: data.get('eligible') === 'yes', available: data.get('available') === 'yes', conflictClear: data.get('conflictClear') === 'yes', expiresAt: new Date(field(data, 'expiry')).toISOString(), reason: field(data, 'reason') };
       const cmd = rosterDraftCommand(reviewIntent.current, candidate, { expectedRevision, body });
@@ -52,6 +57,14 @@ export function RosterPage() {
         intent.current = null; await reload(); return 'Provisional roster saved.';
       }}><label className="field">Roster JSON<textarea name="entries" rows={8} required defaultValue={draft?.entries ? JSON.stringify(draft.entries, null, 2) : '[]'} /></label></ActionForm></fieldset>
     </Panel>
-    <Panel title="Current review ledger"><pre>{JSON.stringify(workspace.reviews ?? [], null, 2)}</pre></Panel>
+    <Panel title="Current candidate reviews"><ul>{reviewRows.map((row, i) =>
+      <li key={String(row.candidate_id ?? i)}>Candidate {String(row.candidate_id ?? 'unknown')} - revision {String(row.revision ?? '?')} - eligible {String(row.eligible)} - available {String(row.available)} - conflicts clear {String(row.conflict_clear)}</li>)}</ul>
+      {nextReview && <Button disabled={paging} onClick={() => { if (paging) return; setPaging(true);
+        void client.workspace(tenant, event, nextReview).then(page => {
+          const rows = Array.isArray(page.reviews) ? page.reviews as Record<string, unknown>[] : [];
+          setReviewRows(old => [...old, ...rows.filter(row => !old.some(prev => prev.candidate_id === row.candidate_id))]);
+          setNextReview(typeof page.nextCandidate === 'string' ? identifier('principal')(page.nextCandidate) : null);
+        }).catch(() => { setStale(true); setError('Review pagination unavailable; refresh before editing.'); }).finally(() => setPaging(false));
+      }}>Load more candidate reviews</Button>}</Panel>
     </>}</div>;
 }

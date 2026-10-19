@@ -1,4 +1,5 @@
 import { AdministrationPage } from './administration.js';
+import { RosterPage } from './roster.js';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { RulesetsPage, ContractPage } from './competition.js';
 import { createRoot } from 'react-dom/client';
@@ -80,7 +81,7 @@ function Application() {
     if (alive) { document.title = `${brand.name} | Debate workspace`; setState({ brand, session, identityEnabled: config.identityEnabled === true }); }
   })().catch((e: unknown) => { if (alive) setError(e instanceof Error ? e.message : 'Unable to load the workspace.'); }); return () => { alive = false; }; }, []);
   if (!state) return <main className="loading-page" id="main"><h1>Debate workspace</h1>{error ? <Notice tone="error">{error} <a href={path}>Try again</a>.</Notice> : <Notice>Loading your workspace...</Notice>}</main>;
-  const protectedPage = ['/app', '/workspaces', '/workspace', '/security', '/rulesets', '/contract', '/administration'].includes(path);
+  const protectedPage = ['/app', '/workspaces', '/workspace', '/security', '/rulesets', '/contract', '/administration', '/roster'].includes(path);
   let content: ReactNode;
   if (protectedPage && !state.session) content = <><PageTitle eyebrow="Account access" title="Sign in to continue" /><Notice>{state.identityEnabled ? <a href="/sign-in">Sign in to view your personal workspace.</a> : 'Account access has not been configured on this server.'}</Notice></>;
   else if (['/sign-in', '/register', '/verify-email', '/reset-request', '/reset-password'].includes(path) && !state.identityEnabled) content = <><PageTitle eyebrow="Setup required" title="Account access unavailable" /><Notice>Identity is not configured. No account request has been submitted.</Notice></>;
@@ -94,6 +95,7 @@ function Application() {
   else if (path === '/workspaces') content = <Workspaces />;
   else if (path === '/workspace') content = <WorkspaceView />;
   else if (path === '/administration') content = <AdministrationPage />;
+  else if (path === '/roster') content = <RosterPage />;
   else if (path === '/rulesets') content = <RulesetsPage />;
   else if (path === '/contract') content = <ContractPage />;
   else if (path === '/components') content = <ComponentReference />;

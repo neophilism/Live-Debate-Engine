@@ -21,5 +21,7 @@ test('skipped sequence, wrong participant, unrelated withdrawal and unknown ledg
  reject([entry('accepted',1),{...entry('withdrawn',2),participantId:'person-2'}]);
  reject([{...entry('accepted',1),acceptedBy:'unverified'}]);
  reject([entry('accepted',1),entry('accepted',1)]);
+ reject([entry('accepted',1),entry('accepted',2)]);
+ reject([entry('accepted',1,2),entry('accepted',2,1)]);
  reject([entry('accepted',1),entry('withdrawn',2,1,'b'.repeat(64))]);
 });

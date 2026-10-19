@@ -18,7 +18,11 @@ export function projectConsentHistory({tenantId,eventId,participantId,documentId
         !Number.isSafeInteger(event.documentRevision) || event.documentRevision<1 ||
         typeof event.documentHash!=='string' || !HASH.test(event.documentHash))
       throw new TypeError('Consent history has a gap, invalid entry or inconsistent scope');
-    if (event.eventType==='accepted') active={revision:event.documentRevision,documentHash:event.documentHash,sequence:event.sequence};
+    if (event.eventType==='accepted') {
+      if (active && event.documentRevision<=active.revision)
+        throw new TypeError('An active consent cannot be overwritten with the same or an older document revision');
+      active={revision:event.documentRevision,documentHash:event.documentHash,sequence:event.sequence};
+    }
     else {
       if (!active || active.revision!==event.documentRevision || active.documentHash!==event.documentHash)
         throw new TypeError('Withdrawal must target the current exact consent');

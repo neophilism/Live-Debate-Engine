@@ -10,6 +10,7 @@ export function RosterPage() {
   const [workspace, setWorkspace] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState(''); const [stale, setStale] = useState(false);
   const intent = useRef<RosterDraftCommand | null>(null);
+  const reviewIntent = useRef<RosterDraftCommand | null>(null);
   const reload = async () => {
     try { setWorkspace(await client.workspace(tenant, event)); setError(''); setStale(false); }
     catch { setStale(true); setError('Roster unavailable. Check organizer access.'); }
@@ -30,9 +31,10 @@ export function RosterPage() {
       const current = reviews.find(r => r.candidate_id === candidate);
       const expectedRevision = typeof current?.revision === 'number' ? current.revision : 0;
       const body = { eligible: data.get('eligible') === 'yes', available: data.get('available') === 'yes', conflictClear: data.get('conflictClear') === 'yes', expiresAt: new Date(field(data, 'expiry')).toISOString(), reason: field(data, 'reason') };
-      const cmd = rosterDraftCommand(null, candidate, { expectedRevision, body });
+      const cmd = rosterDraftCommand(reviewIntent.current, candidate, { expectedRevision, body });
+      reviewIntent.current = cmd;
       try { await client.review(tenant, event, candidate, cmd, body, expectedRevision); } catch (e) { setStale(true); throw e; }
-      await reload(); return 'Review recorded without granting a role.';
+      reviewIntent.current = null; await reload(); return 'Review recorded without granting a role.';
     }}>
       <Field label="Candidate principal UUID" name="candidate" required />
       <label className="checkbox"><input type="checkbox" name="eligible" value="yes" /> Eligibility confirmed</label>

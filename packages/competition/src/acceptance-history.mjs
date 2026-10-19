@@ -17,7 +17,7 @@ export function projectConsentHistory({tenantId,eventId,participantId,documentId
         event.sequence!==expectedSequence || !TYPES.has(event.eventType) ||
         !Number.isSafeInteger(event.documentRevision) || event.documentRevision<1 ||
         typeof event.documentHash!=='string' || !HASH.test(event.documentHash) ||
-        typeof event.recordedAt!=='string' || !/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/.test(event.recordedAt) ||
+        typeof event.recordedAt!=='string' || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.][0-9]{3}Z$/.test(event.recordedAt) ||
         !Number.isFinite(Date.parse(event.recordedAt)) || new Date(event.recordedAt).toISOString()!==event.recordedAt ||
         (lastRecordedAt && event.recordedAt<lastRecordedAt))
       throw new TypeError('Consent history has a gap, invalid entry or inconsistent scope');

@@ -23,6 +23,7 @@ export function evaluateEventAcceptance({ tenantId, eventId, participantId, docu
         required.has(doc.documentId)) throw new TypeError('Invalid document manifest');
     required.set(doc.documentId, doc);
   }
+  if (![...required.values()].some(doc => doc.required)) throw new TypeError('A required legal document is missing');
   const seen = new Set();
   const accepted = new Map();
   for (const entry of acceptances) {
@@ -31,6 +32,7 @@ export function evaluateEventAcceptance({ tenantId, eventId, participantId, docu
     if (scopedId(entry.eventId) !== eventId) throw new TypeError('Acceptance event scope mismatch');
     const { eventId: _eventId, ...legacy } = entry;
     const row = reviewDocumentAcceptance(legacy);
+    if (!required.has(row.documentId)) throw new TypeError('Acceptance references an unrecognized document');
     if (row.tenantId !== tenantId || row.participantId !== participantId || seen.has(row.documentId)) throw new TypeError('Acceptance identity mismatch or duplicate');
     seen.add(row.documentId); accepted.set(row.documentId, row);
   }

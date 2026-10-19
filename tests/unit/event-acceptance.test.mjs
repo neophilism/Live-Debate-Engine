@@ -32,4 +32,7 @@ test('cross-event and cross-tenant reuse, duplicate receipts, unknown kinds and 
   reject({ ...base, documents: [{...terms, permissions:['admin']}] });
   reject({ ...base, isJunior:'false' });
   reject({ ...base, documents: [terms, terms] });
+  reject({ ...base, documents: [], acceptances: [] });
+  reject({ ...base, documents: [{ ...terms, required: false }], acceptances: [] });
+  reject({ ...base, acceptances: [{ ...receipt(terms), documentId: 'different-document' }] });
 });

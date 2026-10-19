@@ -9,3 +9,15 @@ Remaining: authenticated eligibility and guardian flows, tamper-evident
 acceptance storage, release version history, private personal data retention,
 age/jurisdiction rules, integrated organizer and attendee journeys and tests.
 No legal conclusion or production readiness is asserted.
+
+## Event-scoped preflight, not consent issuance
+
+`event-acceptance.mjs` now compares a strict event/tenant/participant-scoped set of document receipts to the *exact* required revision and content digest. It rejects foreign-event receipts, foreign-tenant receipts, duplicate document IDs, forged extra fields and missing or superseded evidence. The result always includes `competitionReady:false`, `identityVerified:false` and `legallyEffective:false`; a matching set of strings never substitutes for authenticated, durable consent.
+
+`legal-template.mjs` parses a bounded document kind, title, body, jurisdiction and revision, and calculates a deterministic SHA-256 digest across the immutable envelope. The proposed approval-state label is *not* proof that legal counsel or the document owner approved the text. The envelope explicitly returns `legallyApproved:false` and `operational:false`. Changes to wording, jurisdiction, revision, or approval state change the digest; prior receipts must not be silently reused.
+
+The two new isolated unit suites are `event-acceptance.test.mjs` and `legal-template.test.mjs`. They test structural matching and negative boundaries only, not a live signer, production browser, legally enforceable signature or a real guardian approval.
+
+## Durable integration prerequisite
+
+The canonical development plan depends on E09 roster/identity preparation. The E09 provisional casting work is not merged, and no authenticated document publisher or participant acceptance ledger is yet connected to the database. Do not create an E10 migration that collides with E09's pending 0012 sequence. After upstream integration, implement a new additive guarded migration and a database-backed immutable ledger with verified server timestamps, idempotent commands, participant-bound consent and guardian evidence; add event-specific retrieval, revocation/supersession, privacy retention and real browser/PG negative tests. No deployment or signature validity is claimed by this document.
